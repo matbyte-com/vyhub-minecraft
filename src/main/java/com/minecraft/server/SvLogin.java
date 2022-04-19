@@ -2,7 +2,6 @@ package com.minecraft.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -41,8 +40,6 @@ public class SvLogin implements CommandExecutor {
             e.printStackTrace();
         }
 
-        System.out.println("ARGS: "+ args[0]);
-
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.vyhub.app/myinstance/v1/auth/request/" + args[0]))
                 .setHeader("Authorization", "Bearer " + "RX0E5fAb9VMrFJbnETjLbGAXeCMEoPnUwjocWXtfY0V3lDObZWIehQKpQ4Kv5jWt")
@@ -56,11 +53,9 @@ public class SvLogin implements CommandExecutor {
         }
         if (response.statusCode() != 200) {
             sendUsage(sender);
-            System.out.println("STATUSCODE " + response.body() + "    " + response.statusCode());
             return true;
         }
         sender.sendMessage("§aSuccessfully logged in!");
-        System.out.println("YAAA " + response.body() + "    " + response.statusCode());
         return false;
     }
 
