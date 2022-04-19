@@ -1,0 +1,10 @@
+name: Vyhub
+version: '${project.version}'
+main: com.minecraft.Vyhub
+api-version: 1.18
+
+
+commands:
+  login:
+    description: 'Login user for VyHub'
+    aliases: ['l']
