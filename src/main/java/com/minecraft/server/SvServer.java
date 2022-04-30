@@ -43,8 +43,8 @@ public class SvServer {
         return response;
     }
 
+    //TODO getServerInformationObject().get("id") ServerID aus Config datei lesen
     public static void patchServer() {
-
         var values = new HashMap<String, Object>() {{
             put("users_max", String.valueOf(Bukkit.getMaxPlayers()));
             put("users_current", String.valueOf(Bukkit.getOnlinePlayers().size()));
@@ -66,6 +66,7 @@ public class SvServer {
                 .setHeader("Authorization", "Bearer " + "coXfmc7Uuf08poaxwsOWOQK7zwke9xQodhqL1iDmD4WPC2iuIa2gkOKdXEyZleRX")
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
+
         try {
            HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {

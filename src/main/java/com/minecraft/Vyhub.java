@@ -1,10 +1,7 @@
 package com.minecraft;
 
 import com.minecraft.lib.PlayerGivenPermissionListener;
-import com.minecraft.server.SvGroups;
-import com.minecraft.server.SvLogin;
-import com.minecraft.server.SvServer;
-import com.minecraft.server.SvUser;
+import com.minecraft.server.*;
 import net.luckperms.api.LuckPerms;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -38,6 +35,7 @@ public class Vyhub extends JavaPlugin {
 
         BukkitScheduler scheduler = Bukkit.getScheduler();
         scheduler.runTaskTimer(this, SvServer::patchServer, 20L*1L, 20L*60L);
+        scheduler.runTaskTimer(this, SvBans::getBans, 20L*1L, 20L*60L);
 
         this.luckPerms = getServer().getServicesManager().load(LuckPerms.class);
         new PlayerGivenPermissionListener(this, this.luckPerms).register();
