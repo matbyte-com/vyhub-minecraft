@@ -26,6 +26,7 @@ import java.util.*;
 public class SvBans {
     private static Map<String, Boolean> banPlayer = new HashMap<>();
 
+    //TODO eigener Ban command mit zeit (vielleicht auch eigener Unban Command)
     public static void getVyHubBans() {
         JSONObject serverbundleObject = (JSONObject) SvServer.getServerInformationObject().get("serverbundle");
         String serverBundleId = serverbundleObject.get("id").toString();
@@ -72,22 +73,17 @@ public class SvBans {
 
 
                 Date date = null;
-              String dateCalc = "";
               if (banObject.get("ends_on") != null) {
                   OffsetDateTime dateTime = OffsetDateTime.parse(banObject.get("ends_on").toString());
                   date = Date.from(dateTime.toInstant());
-                  dateCalc = date.toString();
-              } else {
-                  dateCalc = "forever";
-                }
-
-              for (Player banPlayer : Bukkit.getServer().getOnlinePlayers()) {
-                  if (banPlayer.getUniqueId().toString().equals(playerUUID)) {
-                      banPlayer.kickPlayer(reason);
-                  }
               }
 
                 if (!banPlayer.containsKey(playerUUID)) {
+                    for (Player banPlayer : Bukkit.getServer().getOnlinePlayers()) {
+                        if (banPlayer.getUniqueId().toString().equals(playerUUID)) {
+                            banPlayer.kickPlayer(reason);
+                        }
+                    }
                   Bukkit.getBanList(BanList.Type.NAME).addBan(playerUUID, reason, date, "VyHub");
                   banPlayer.put(playerUUID, false);
               } else if (banPlayer.get(playerUUID)) {
