@@ -69,7 +69,12 @@ public class SvBans {
               OffsetDateTime dateTime = OffsetDateTime.parse(banObject.get("ends_on").toString());
               Date date = Date.from(dateTime.toInstant());
 
-              //TODO wenn Player online kicken
+              for (Player banPlayer : Bukkit.getServer().getOnlinePlayers()) {
+                  if (banPlayer.getUniqueId().toString().equals(playerUUID)) {
+                      banPlayer.kickPlayer(reason);
+                  }
+              }
+
               Bukkit.getBanList(BanList.Type.NAME).addBan(playerUUID, reason, date, "VyHub");
 
               MessageDigest messageDigest = MessageDigest.getInstance("MD5");

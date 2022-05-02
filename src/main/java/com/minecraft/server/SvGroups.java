@@ -30,7 +30,7 @@ import java.util.List;
 public class SvGroups implements Listener {
 
     @EventHandler
-    public static void synchGroups(PlayerJoinEvent event) {
+    public static void syncGroups(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
         JSONParser jsonParser = new JSONParser();
@@ -62,6 +62,10 @@ public class SvGroups implements Listener {
 
             List<String> allGroups = new ArrayList<>();
 
+            // TODO: Von allen Gruppen alle mappings bestimmen, wo mapping.serverbundle_id der
+            //  Serverbundle ID entspricht oder null ist.
+            //  Diese Gruppen in `allGroups` speichern.
+
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject jsonObject = (JSONObject) jsonArray.get(i);
                 JSONArray mappings = (JSONArray) jsonObject.get("mappings");
@@ -70,6 +74,8 @@ public class SvGroups implements Listener {
                 String groupName =  groupParameters.get("name").toString();
                 allGroups.add(groupName);
             }
+
+            // TO DO END
 
             addUserToGroup(allGroups, player);
 
