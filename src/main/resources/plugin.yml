@@ -8,3 +8,9 @@ commands:
   login:
     description: 'Login user for VyHub'
     aliases: ['l']
+
+  timeban:
+    description: 'Ban user for a certain time'
+    aliases: ['tb']
+
+
