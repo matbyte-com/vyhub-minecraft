@@ -34,6 +34,7 @@ public class Vyhub extends JavaPlugin {
         BukkitScheduler scheduler = Bukkit.getScheduler();
         scheduler.runTaskTimer(this, SvServer::patchServer, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(this, SvBans::getVyHubBans, 20L*1L, 20L*60L);
+        scheduler.runTaskTimer(this, SvStatistics::sendPlayerTime, 20L*1L, 20L*60L);
 
         this.luckPerms = getServer().getServicesManager().load(LuckPerms.class);
         new PlayerGivenPermissionListener(this, this.luckPerms).register();
