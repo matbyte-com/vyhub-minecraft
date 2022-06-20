@@ -13,4 +13,7 @@ commands:
     description: 'Ban user for a certain time'
     aliases: ['tb']
 
+  warning:
+    description: 'Player Warning'
+    aliases: ['w']
 

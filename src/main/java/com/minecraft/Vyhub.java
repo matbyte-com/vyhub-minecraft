@@ -53,6 +53,7 @@ public class Vyhub extends JavaPlugin {
     private void commandRegistration() {
         getCommand("login").setExecutor(new SvLogin());
         getCommand("timeban").setExecutor(new SvBans());
+        getCommand("warning").setExecutor(new SvWarning());
     }
 
 
