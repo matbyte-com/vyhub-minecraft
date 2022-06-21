@@ -1,66 +1,88 @@
 package com.minecraft.server;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.bukkit.Bukkit;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
+import com.minecraft.lib.Types;
+import com.minecraft.lib.Utility;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import java.net.http.HttpResponse;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class SvStatistics {
+    public static HashMap<String, Double> playerTime = new HashMap<>();
+
+    public static String checkDefinition(){
+        HttpResponse<String> response = Utility.sendRequest("/user/attribute/definition/playtime", Types.GET);
+
+        if (response.statusCode() != 200) {
+            JSONParser jsonParser = new JSONParser();
+            JSONObject object = null;
+            try {
+                object = (JSONObject) jsonParser.parse(response.body());
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+            return object.get("id").toString();
+        }
+
+        HashMap<String, Object> values = new HashMap<>() {{
+            put("name", "playtime");
+            put("title", "Play Time");
+            put("unit", "HOURS");
+            put("type", "ACCUMULATED");
+            put("accumulation_interval", "day");
+            put("unspecific", true);
+        }};
+
+        HttpResponse<String> resp = Utility.sendRequestBody("/user/attribute/definition", Types.POST, Utility.createRequestBody(values));
+
+        JSONParser jsonParser = new JSONParser();
+        JSONObject object = null;
+        try {
+            object = (JSONObject) jsonParser.parse(resp.body());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        return object.get("id").toString();
+    }
 
     public static void sendPlayerTime() {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.vyhub.app/myinstance/v1/user/attribute/definition?name=playtime"))
-                .method("GET", HttpRequest.BodyPublishers.noBody())
-                .build();
-        HttpResponse<String> response = null;
-        try {
-            response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        String definitionID = checkDefinition();
 
 
-        if (Objects.equals(response.body(), "[]")) {
-            System.out.println("ALLLLLTERRRRRR");
-            var values = new HashMap<String, Object>() {{
-                put("name", "playtime");
-                put("title", "Play Time");
-                put("unit", "HOURS");
-                put("type", "ACCUMULATED");
-                put("accumulation_interval", "day");
-                put("unspecific", true);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+
+            if (Math.round(playerTime.get(player.getUniqueId().toString()) / 60) < 1 ) {
+                continue;
+            }
+            HashMap<String, Object> values = new HashMap<>() {{
+                put("definition_id", definitionID);
+                put("user_id", SvUser.getUser(player.getUniqueId().toString()).getId());
+                put("serverbundle_id", Utility.serverbundleID);
+                put("value",String.valueOf(Math.round(playerTime.get(player.getUniqueId().toString()) / 60)));
             }};
 
-            var objectMapper = new ObjectMapper();
-            String requestBody = null;
+            Utility.sendRequestBody("/user/attribute/", Types.POST, Utility.createRequestBody(values));
+            resetPlayerTime(player);
+        }
+    }
 
-            try {
-                requestBody = objectMapper
-                        .writeValueAsString(values);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
+    public static void resetPlayerTime(Player player) {
+        playerTime.replace(player.getUniqueId().toString(), 0.0);
+    }
 
-
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.vyhub.app/myinstance/v1/user/attribute/definition"))
-                    .setHeader("Authorization", "Bearer " + "RX0E5fAb9VMrFJbnETjLbGAXeCMEoPnUwjocWXtfY0V3lDObZWIehQKpQ4Kv5jWt")
-                    .method("POST", HttpRequest.BodyPublishers.ofString(requestBody))
-                    .build();
-            HttpResponse<String> resp = null;
-            try {
-                resp = HttpClient.newHttpClient().send(req, HttpResponse.BodyHandlers.ofString());
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
+    public static void playerTime() {
+        for (Player player: Bukkit.getOnlinePlayers()) {
+            if (playerTime.containsKey(player.getUniqueId().toString())) {
+                double oldTime = playerTime.get(player.getUniqueId().toString());
+                playerTime.replace(player.getUniqueId().toString(), oldTime + 1);
+            } else {
+                playerTime.put(player.getUniqueId().toString(), 1.0);
             }
         }
-
     }
 }

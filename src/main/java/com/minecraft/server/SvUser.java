@@ -1,20 +1,15 @@
 package com.minecraft.server;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.minecraft.Entity.VyHubPlayer;
+import com.minecraft.lib.Types;
+import com.minecraft.lib.Utility;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +24,6 @@ public class SvUser implements Listener {
         getUser(player.getUniqueId().toString());
     }
 
-
     public static VyHubPlayer getUser(String UUID) {
         if (vyHubPlayers != null) {
             for (VyHubPlayer player : vyHubPlayers) {
@@ -41,17 +35,7 @@ public class SvUser implements Listener {
 
         String userInformation = "";
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.vyhub.app/myinstance/v1/user/" + UUID + "?type=MINECRAFT"))
-                .method("GET", HttpRequest.BodyPublishers.noBody())
-                .build();
-        HttpResponse<String> response = null;
-
-        try {
-            response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        HttpResponse<String> response = Utility.sendRequest("/user/" + UUID + "?type=MINECRAFT", Types.GET);
 
         if (response.statusCode() == 404) {
             userInformation = createUser(UUID);
@@ -71,36 +55,14 @@ public class SvUser implements Listener {
         HttpResponse<String> response = null;
 
         while (statusCode != 200) {
-            var values = new HashMap<String, Object>() {{
+            HashMap<String, Object> values = new HashMap<>() {{
                 put("type", "MINECRAFT");
                 put("identifier", UUID);
             }};
 
-            var objectMapper = new ObjectMapper();
-            String requestBody = null;
-
-            try {
-                requestBody = objectMapper
-                        .writeValueAsString(values);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.vyhub.app/myinstance/v1/user/"))
-                    .setHeader("Authorization", "Bearer " + "coXfmc7Uuf08poaxwsOWOQK7zwke9xQodhqL1iDmD4WPC2iuIa2gkOKdXEyZleRX")
-                    .method("POST", HttpRequest.BodyPublishers.ofString(requestBody))
-                    .build();
-
-            try {
-                response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
+            response = Utility.sendRequestBody("/user/", Types.POST, Utility.createRequestBody(values));
             statusCode = response.statusCode();
         }
-
         return response.body();
     }
 }

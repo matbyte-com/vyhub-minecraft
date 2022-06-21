@@ -1,15 +1,15 @@
 package com.minecraft;
 
+
 import com.minecraft.lib.PlayerGivenPermissionListener;
 import com.minecraft.server.*;
 import net.luckperms.api.LuckPerms;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +17,6 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
 
 
 public class Vyhub extends JavaPlugin {
@@ -34,7 +33,8 @@ public class Vyhub extends JavaPlugin {
         BukkitScheduler scheduler = Bukkit.getScheduler();
         scheduler.runTaskTimer(this, SvServer::patchServer, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(this, SvBans::getVyHubBans, 20L*1L, 20L*60L);
-        scheduler.runTaskTimer(this, SvStatistics::sendPlayerTime, 20L*1L, 20L*60L);
+        scheduler.runTaskTimer(this, SvStatistics::playerTime, 20L*1L, 20L*60L);
+        scheduler.runTaskTimer(this, SvStatistics::sendPlayerTime, 20L*1L, 20L*60L*60L);
 
         this.luckPerms = getServer().getServicesManager().load(LuckPerms.class);
         new PlayerGivenPermissionListener(this, this.luckPerms).register();
@@ -62,7 +62,7 @@ public class Vyhub extends JavaPlugin {
         JSONParser jsonParser = new JSONParser();
         Map<String, String> configMap = new HashMap<>();
 
-        try (FileReader reader = new FileReader("config.json"))
+        try (FileReader reader = new FileReader("plugins/Vyhub/config.json"))
         {
             JSONObject jsonObj = (JSONObject) jsonParser.parse(reader);
 
@@ -76,21 +76,19 @@ public class Vyhub extends JavaPlugin {
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
-
         return configMap;
     }
 
-    private static void createJsonFile() {
+    private static void createJsonFile() {;
         JSONObject configDetails = new JSONObject();
         configDetails.put("API-URL","");
         configDetails.put("API-Key","");
         configDetails.put("Server-ID","");
 
-
-        try (FileWriter file = new FileWriter("config.json")) {
-            file.write(configDetails.toJSONString());
-            file.flush();
-
+        getPlugin(Vyhub.class).getDataFolder().mkdir();
+        try (FileWriter fileWr = new FileWriter("plugins/Vyhub/config.json")) {
+            fileWr.write(configDetails.toJSONString());
+            fileWr.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

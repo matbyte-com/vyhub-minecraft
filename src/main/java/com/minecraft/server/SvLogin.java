@@ -1,65 +1,37 @@
 package com.minecraft.server;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minecraft.lib.Types;
+import com.minecraft.lib.Utility;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 
 public class SvLogin implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-
         if (args.length == 0) {
-            sendUsage(sender);
+            Utility.sendUsage(sender, "/login <UUID>");
             return true;
         }
 
         Player player = (Player) sender;
 
-        var values = new HashMap<String, Object>() {{
+        HashMap<String, Object> values = new HashMap<>(){{
             put("user_type", "MINECRAFT");
             put("identifier", player.getUniqueId());
         }};
 
-        var objectMapper = new ObjectMapper();
-        String requestBody = null;
+        HttpResponse<String> response =  Utility.sendRequestBody("/auth/request/"+ args[0], Types.PATCH, Utility.createRequestBody(values));
 
-        try {
-            requestBody = objectMapper
-                    .writeValueAsString(values);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.vyhub.app/myinstance/v1/auth/request/" + args[0]))
-                .setHeader("Authorization", "Bearer " + "RX0E5fAb9VMrFJbnETjLbGAXeCMEoPnUwjocWXtfY0V3lDObZWIehQKpQ4Kv5jWt")
-                .method("PATCH", HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-        HttpResponse<String> response = null;
-        try {
-           response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
         if (response.statusCode() != 200) {
-            sendUsage(sender);
+            Utility.sendUsage(sender, "/login <UUID>");
             return true;
         }
         sender.sendMessage("§aSuccessfully logged in!");
         return false;
-    }
-
-    private void sendUsage(CommandSender sender) {
-        sender.sendMessage("§cUsage: §9/login <UUID>");
     }
 }

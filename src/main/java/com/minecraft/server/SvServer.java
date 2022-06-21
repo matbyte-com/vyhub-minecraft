@@ -1,41 +1,30 @@
 package com.minecraft.server;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.bukkit.Bukkit;
-import org.bukkit.generator.WorldInfo;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
-import java.io.FileReader;
+import com.minecraft.Vyhub;
+import com.minecraft.lib.Types;
+import com.minecraft.lib.Utility;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class SvServer {
 
-    //TODO URL austauschen für endgültige Anwendung
     public static HttpResponse<String> getServerInformation() {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.vyhub.app/myinstance/v1/server/?type=MINECRAFT"))
-                .method("GET", HttpRequest.BodyPublishers.noBody())
-                .build();
-        HttpResponse<String> response = null;
-        try {
-            response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        HttpResponse<String> response = Utility.sendRequest("/server/?type=MINECRAFT", Types.GET);
 
-        try (FileWriter file = new FileWriter("serverInformation.json")) {
-            file.write(response.body());
-            file.flush();
+
+        try (FileWriter fileWr = new FileWriter("plugins/Vyhub/serverInformation.json")) {
+            fileWr.write(response.body());
+            fileWr.flush();
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -43,60 +32,25 @@ public class SvServer {
         return response;
     }
 
-    //TODO getServerInformationObject().get("id") ServerID aus Config datei lesen
     public static void patchServer() {
-        var values = new HashMap<String, Object>() {{
+        getServerInformation();
+
+        List<Map<String, String>> user_activities = new LinkedList<>();
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            HashMap<String, String> map = new HashMap<>();
+            map.put("user_id", SvUser.getUser(player.getUniqueId().toString()).getId());
+            user_activities.add(map);
+        }
+
+        HashMap<String, Object> values = new HashMap<>() {{
             put("users_max", String.valueOf(Bukkit.getMaxPlayers()));
             put("users_current", String.valueOf(Bukkit.getOnlinePlayers().size()));
+            put("user_activities", user_activities);
             put("is_alive", "true");
         }};
+        Utility.getServerInformationObject();
 
-        var objectMapper = new ObjectMapper();
-        String requestBody = null;
-
-        try {
-            requestBody = objectMapper
-                    .writeValueAsString(values);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.vyhub.app/myinstance/v1/server/" + getServerInformationObject().get("id")))
-                .setHeader("Authorization", "Bearer " + "coXfmc7Uuf08poaxwsOWOQK7zwke9xQodhqL1iDmD4WPC2iuIa2gkOKdXEyZleRX")
-                .method("PATCH", HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-        try {
-           HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    public static JSONObject getServerInformationObject() {
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObj = null;
-        if (getServerInformation().statusCode() != 200) {
-            try (FileReader reader = new FileReader("serverInformation.json")) {
-
-                JSONArray jsonArray = (JSONArray) jsonParser.parse(reader);
-                jsonObj = (JSONObject) jsonArray.get(0);
-
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
-            }
-        } else {
-            try {
-                JSONArray jsonArray = (JSONArray) jsonParser.parse(getServerInformation().body());
-                jsonObj = (JSONObject) jsonArray.get(0);
-
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
-        return jsonObj;
+        Utility.sendRequestBody("/server/" + Vyhub.checkConfig().get("serverId"), Types.PATCH, Utility.createRequestBody(values));
     }
 }
-
