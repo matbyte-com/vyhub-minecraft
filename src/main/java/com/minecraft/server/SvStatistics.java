@@ -18,7 +18,7 @@ public class SvStatistics {
     public static String checkDefinition(){
         HttpResponse<String> response = Utility.sendRequest("/user/attribute/definition/playtime", Types.GET);
 
-        if (response.statusCode() != 200) {
+        if (response.statusCode() == 200) {
             JSONParser jsonParser = new JSONParser();
             JSONObject object = null;
             try {
