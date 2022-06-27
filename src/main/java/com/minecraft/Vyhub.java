@@ -34,6 +34,7 @@ public class Vyhub extends JavaPlugin {
         scheduler.runTaskTimer(this, SvServer::patchServer, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(this, SvBans::getVyHubBans, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(this, SvStatistics::playerTime, 20L*1L, 20L*60L);
+        scheduler.runTaskTimer(this, SvRewards::getRewards, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(this, SvStatistics::sendPlayerTime, 20L*1L, 20L*60L*60L);
 
         this.luckPerms = getServer().getServicesManager().load(LuckPerms.class);
@@ -54,7 +55,7 @@ public class Vyhub extends JavaPlugin {
     private void commandRegistration() {
         getCommand("login").setExecutor(new SvLogin());
         getCommand("timeban").setExecutor(new SvBans());
-        getCommand("warning").setExecutor(new SvWarning());
+        getCommand("warn").setExecutor(new SvWarning());
     }
 
 

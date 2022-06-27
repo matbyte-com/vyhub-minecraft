@@ -36,7 +36,7 @@ public class SvWarning implements CommandExecutor {
         Player player = (Player) sender;
         if (player.isOp()) {
             if (args.length == 0) {
-                Utility.sendUsage(sender, "/warning <Player> <reason>");
+                Utility.sendUsage(sender, "/warn <Player> <reason>");
                 return true;
             }
 

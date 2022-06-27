@@ -118,8 +118,7 @@ public class SvBans implements CommandExecutor {
                     banPlayer.put(uuid, true);
 
                     String createdPlayerUUID = "";
-                    //TODO change to Onlineplayers
-                    for (OfflinePlayer sourcePlayer : Bukkit.getServer().getOfflinePlayers()) {
+                    for (Player sourcePlayer : Bukkit.getServer().getOnlinePlayers()) {
                         if (sourcePlayer.getName().equals(source)) {
                             createdPlayerUUID = sourcePlayer.getUniqueId().toString();
                         }
