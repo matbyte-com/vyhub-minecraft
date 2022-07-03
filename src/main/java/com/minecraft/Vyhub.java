@@ -11,6 +11,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.bukkit.scheduler.BukkitScheduler;
@@ -29,12 +31,14 @@ public class Vyhub extends JavaPlugin {
         checkConfig();
         listenerRegistration();
         commandRegistration();
+        SvRewards.loadExecuted();
 
         BukkitScheduler scheduler = Bukkit.getScheduler();
         scheduler.runTaskTimer(this, SvServer::patchServer, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(this, SvBans::getVyHubBans, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(this, SvStatistics::playerTime, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(this, SvRewards::getRewards, 20L*1L, 20L*60L);
+        scheduler.runTaskTimer(this, SvRewards::runDirectRewards, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(this, SvStatistics::sendPlayerTime, 20L*1L, 20L*60L*60L);
 
         this.luckPerms = getServer().getServicesManager().load(LuckPerms.class);
