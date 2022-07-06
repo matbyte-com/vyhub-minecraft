@@ -35,11 +35,17 @@ public class SvServer {
     public static void patchServer() {
         getServerInformation();
 
-        List<Map<String, String>> user_activities = new LinkedList<>();
+        List<Map<String, Object>> user_activities = new LinkedList<>();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            HashMap<String, String> map = new HashMap<>();
+            HashMap<String, Object> map = new HashMap<>();
+            HashMap<String, String> extra = new HashMap<>();
+            extra.put("Ping", player.getPing() + " ms");
+           // extra.put("World", player.getWorld().getName());
+
             map.put("user_id", SvUser.getUser(player.getUniqueId().toString()).getId());
+            map.put("extra", extra);
+
             user_activities.add(map);
         }
 

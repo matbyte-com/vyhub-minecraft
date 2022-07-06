@@ -5,20 +5,19 @@ import com.minecraft.lib.PlayerGivenPermissionListener;
 import com.minecraft.server.*;
 import net.luckperms.api.LuckPerms;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.bukkit.scheduler.BukkitScheduler;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import static com.minecraft.server.SvRewards.loadExecuted;
 
 
 public class Vyhub extends JavaPlugin {
@@ -31,7 +30,7 @@ public class Vyhub extends JavaPlugin {
         checkConfig();
         listenerRegistration();
         commandRegistration();
-        SvRewards.loadExecuted();
+        loadExecuted();
 
         BukkitScheduler scheduler = Bukkit.getScheduler();
         scheduler.runTaskTimer(this, SvServer::patchServer, 20L*1L, 20L*60L);

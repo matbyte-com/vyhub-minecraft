@@ -1,5 +1,6 @@
 package com.minecraft.server;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.minecraft.Entity.AppliedReward;
 import com.minecraft.Entity.Reward;
@@ -8,13 +9,13 @@ import com.minecraft.Vyhub;
 import com.minecraft.lib.Types;
 import com.minecraft.lib.Utility;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.json.simple.JSONObject;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.lang.reflect.Type;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +28,7 @@ public class SvRewards {
 
     private static Map<String, List<AppliedReward>> rewards;
     private static List<String> executedRewards;
+    private static List<String> executedAndSentRewards;
 
 
     public static void getRewards() {
@@ -49,7 +51,10 @@ public class SvRewards {
         HttpResponse<String> resp = Utility.sendRequestBody("/packet/reward/applied/user?" + stringBuilder, Types.GET, Utility.createRequestBody(values));
 
         Gson gson = new Gson();
-        rewards = gson.fromJson(resp.body(), HashMap.class);
+        Type userRewardType = new TypeToken<Map<String, List<AppliedReward>>>() {}.getType();
+
+        rewards = gson.fromJson(resp.body(), userRewardType);
+
     }
 
     public static void executeReward(List<String> events, String playerID) {
@@ -57,7 +62,7 @@ public class SvRewards {
 
         if (playerID == null) {
             for (String event : events) {
-                if (!event.equals("DIRECT") || !event.equals("DISABLE")) {
+                if (!event.equals("DIRECT") && !event.equals("DISABLE")) {
                     throw new RuntimeException();
                 }
             }
@@ -83,6 +88,10 @@ public class SvRewards {
             }
 
             for (AppliedReward appliedReward : appliedRewards) {
+                if (executedRewards.contains(appliedReward.getId()) || executedAndSentRewards.contains(appliedReward.getId())){
+                    continue;
+                }
+
                 Reward reward = appliedReward.getReward();
                 if (events.contains(reward.getOn_event())) {
                     Map<String, String> data = reward.getData();
@@ -116,22 +125,35 @@ public class SvRewards {
     }
 
     public static void sendExecuted() {
-        List<String> serverID = new LinkedList<>();
+        List<String> serverID = new ArrayList<>();
         serverID.add(Vyhub.checkConfig().get("serverId"));
+        executedAndSentRewards = new ArrayList<>();
         HashMap<String, Object> values = new HashMap<>() {{
             put("executed_on", serverID);
         }};
-        for (String rewardID : executedRewards) {
+        for (Iterator<String> it = executedRewards.iterator(); it.hasNext();) {
+            String rewardID = it.next();
             HttpResponse<String> response = Utility.sendRequestBody("/packet/reward/applied/" + rewardID, Types.PATCH, Utility.createRequestBody(values));
-
             if (response.statusCode() == 200) {
-                executedRewards.remove(rewardID);
+                executedAndSentRewards.add(rewardID);
+                it.remove();
                 saveExecuted();
             }
+
         }
     }
 
     public static void loadExecuted() {
+        File file = new File("plugins/Vyhub/rewardsQueue.txt");
+
+        if (!file.isFile()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
        try (Stream<String> lines = Files.lines(Paths.get("plugins/Vyhub/rewardsQueue.txt"))) {
            executedRewards = lines.collect(Collectors.toList());
        } catch (IOException e) {
