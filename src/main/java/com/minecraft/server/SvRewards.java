@@ -4,61 +4,73 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.minecraft.Entity.AppliedReward;
 import com.minecraft.Entity.Reward;
-import com.minecraft.Entity.VyHubPlayer;
 import com.minecraft.Vyhub;
 import com.minecraft.lib.Types;
 import com.minecraft.lib.Utility;
 import org.bukkit.Bukkit;
-import org.bukkit.Server;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.json.simple.JSONObject;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.*;
 import java.lang.reflect.Type;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class SvRewards {
+public class SvRewards implements Listener {
 
     private static Map<String, List<AppliedReward>> rewards;
-    private static List<String> executedRewards;
-    private static List<String> executedAndSentRewards;
+    private static List<String> executedRewards = new ArrayList<>();
+    private static List<String> executedAndSentRewards = new ArrayList<>();
 
 
     public static void getRewards() {
-        HashMap<String, Object> values = new HashMap<>() {{
-            put("active", true);
-            put("foreign_ids", true);
-            put("status", "OPEN");
-            put("serverbundle_id", Utility.serverbundleID);
-            put("for_server_id", Vyhub.checkConfig().get("serverId"));
-        }};
-
         StringBuilder stringBuilder = new StringBuilder();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             String userID = SvUser.getUser(player.getUniqueId().toString()).getId();
             stringBuilder.append("user_id=").append(userID).append("&");
         }
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
 
-        HttpResponse<String> resp = Utility.sendRequestBody("/packet/reward/applied/user?" + stringBuilder, Types.GET, Utility.createRequestBody(values));
+        if (stringBuilder.toString().length() != 0) {
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        }
+
+        HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + Utility.serverbundleID + "&for_server_id=" + Vyhub.checkConfig().get("serverId") + "&" +
+               stringBuilder, Types.GET);
 
         Gson gson = new Gson();
         Type userRewardType = new TypeToken<Map<String, List<AppliedReward>>>() {}.getType();
 
         rewards = gson.fromJson(resp.body(), userRewardType);
+    }
 
+    public static void getPlayerReward(Player player) {
+        HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + Utility.serverbundleID + "&for_server_id=" + Vyhub.checkConfig().get("serverId") +
+                "&user_id=" +
+                SvUser.getUser(player.getUniqueId().toString()).getId(), Types.GET);
+
+        Gson gson = new Gson();
+        Type userRewardType = new TypeToken<Map<String, List<AppliedReward>>>() {}.getType();
+
+        Map<String, List<AppliedReward>> playerRewards = gson.fromJson(resp.body(), userRewardType);
+        rewards.put(player.getUniqueId().toString(), playerRewards.getOrDefault(player.getUniqueId().toString(), new ArrayList<>()));
     }
 
     public static void executeReward(List<String> events, String playerID) {
-        Map<String, List<AppliedReward>> rewardsByPlayer = rewards;
+        Map<String, List<AppliedReward>> rewardsByPlayer = new HashMap<>(rewards);
+
 
         if (playerID == null) {
             for (String event : events) {
@@ -68,6 +80,7 @@ public class SvRewards {
             }
         } else {
             rewardsByPlayer.clear();
+
             if (rewards.containsKey(playerID)) {
                 rewardsByPlayer.put(playerID, rewards.get(playerID));
             } else {
@@ -87,6 +100,10 @@ public class SvRewards {
                 }
             }
 
+            if (player == null) {
+                continue;
+            }
+
             for (AppliedReward appliedReward : appliedRewards) {
                 if (executedRewards.contains(appliedReward.getId()) || executedAndSentRewards.contains(appliedReward.getId())){
                     continue;
@@ -95,14 +112,22 @@ public class SvRewards {
                 Reward reward = appliedReward.getReward();
                 if (events.contains(reward.getOn_event())) {
                     Map<String, String> data = reward.getData();
+                    boolean success = true;
                     if (reward.getType().equals("COMMAND")) {
                         String command = data.get("command");
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), stringReplace(command, player, appliedReward.getApplied_packet_id()));
                     } else {
-                        System.out.println("No implementation for Reward Type: " + reward.getType());
+                        success = false;
+
+                        Bukkit.getServer().getLogger().log(Level.WARNING ,"No implementation for Reward Type: " + reward.getType());
                     }
                     if (reward.getOnce()) {
                         setExecuted(appliedReward.getId());
+                    }
+                    if (success)
+                    {
+                        Bukkit.getServer().getLogger().log(Level.INFO ,"RewardName: " + appliedReward.getReward().getName() + " Type: " +
+                            appliedReward.getReward().getType() + " Player: " + player.getName() + " executed!");
                     }
                 }
             }
@@ -169,4 +194,64 @@ public class SvRewards {
 
         executeReward(eventList, null);
     }
+
+
+    @EventHandler
+    public void onLogin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        getPlayerReward(player);
+
+        List<String> eventList = new LinkedList<>();
+        eventList.add("CONNECT");
+        eventList.add("SPAWN");
+
+        executeReward(eventList, player.getUniqueId().toString());
+    }
+
+    @EventHandler
+    public void onSpawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+
+        List<String> eventList = new LinkedList<>();
+        eventList.add("SPAWN");
+
+        new BukkitRunnable() {
+            public void run() {
+                executeReward(eventList, player.getUniqueId().toString());
+            }
+        }.runTaskLater(Vyhub.getPlugin(Vyhub.class), 20);
+
+    }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+
+        List<String> eventList = new LinkedList<>();
+        eventList.add("DEATH");
+
+        executeReward(eventList, player.getUniqueId().toString());
+    }
+
+    @EventHandler
+    public void onDisconnect(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+
+        List<String> eventList = new LinkedList<>();
+        eventList.add("DISCONNECT");
+
+        executeReward(eventList, player.getUniqueId().toString());
+    }
+
+    public static String stringReplace(String command, Player player, String appliedPacketId) {
+        String newString = command;
+        newString = newString.replace("%nick%", player.getName());
+        newString = newString.replace("%user_id%", SvUser.getUser(player.getUniqueId().toString()).getId());
+        newString = newString.replace("%applied_packet_id%", appliedPacketId);
+        newString = newString.replace("%player_id%", player.getUniqueId().toString());
+        newString = newString.replace("%player_ip_address%", player.getAddress().getAddress().toString().replace("/", ""));
+
+        return newString;
+    }
+
 }

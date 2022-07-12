@@ -11,6 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.bukkit.scheduler.BukkitScheduler;
 import org.json.simple.JSONObject;
@@ -53,6 +54,7 @@ public class Vyhub extends JavaPlugin {
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new SvUser(), this);
         pluginManager.registerEvents(new SvGroups(), this);
+        pluginManager.registerEvents(new SvRewards(), this);
     }
 
     private void commandRegistration() {
@@ -75,7 +77,7 @@ public class Vyhub extends JavaPlugin {
             configMap.put("serverId", (String) jsonObj.get("Server-ID"));
 
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().fine("Config File does not exist. Please update config.json File");
+            Bukkit.getServer().getLogger().log(Level.WARNING, "Config File does not exist. Please update config.json File");
             createJsonFile();
         } catch (IOException | ParseException e) {
             e.printStackTrace();

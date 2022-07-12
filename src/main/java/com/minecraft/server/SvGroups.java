@@ -38,20 +38,15 @@ public class SvGroups implements Listener {
 
             List<String> allGroups = new ArrayList<>();
 
-            // TODO: Von allen Gruppen alle mappings bestimmen, wo mapping.serverbundle_id der
-            //  Serverbundle ID entspricht oder null ist.
-            //  Diese Gruppen in `allGroups` speichern.
-
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject jsonObject = (JSONObject) jsonArray.get(i);
                 JSONArray mappings = (JSONArray) jsonObject.get("mappings");
-                JSONObject groupParameters = (JSONObject) mappings.get(0);
-
-                String groupName = groupParameters.get("name").toString();
-                allGroups.add(groupName);
+                for (int j = 0; j < mappings.size(); j++) {
+                    JSONObject groupParameters = (JSONObject) mappings.get(j);
+                    String groupName = groupParameters.get("name").toString();
+                    allGroups.add(groupName);
+                }
             }
-
-            // TO DO END
 
             addUserToGroup(allGroups, player);
 
