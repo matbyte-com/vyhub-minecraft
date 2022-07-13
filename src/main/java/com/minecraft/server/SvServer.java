@@ -1,7 +1,7 @@
 package com.minecraft.server;
 
 
-import com.minecraft.Vyhub;
+import com.minecraft.VyHub;
 import com.minecraft.lib.Types;
 import com.minecraft.lib.Utility;
 import org.bukkit.Bukkit;
@@ -21,7 +21,7 @@ public class SvServer {
         HttpResponse<String> response = Utility.sendRequest("/server/?type=MINECRAFT", Types.GET);
 
 
-        try (FileWriter fileWr = new FileWriter("plugins/Vyhub/serverInformation.json")) {
+        try (FileWriter fileWr = new FileWriter("plugins/VyHub/serverInformation.json")) {
             fileWr.write(response.body());
             fileWr.flush();
 
@@ -57,6 +57,6 @@ public class SvServer {
         }};
         Utility.getServerInformationObject();
 
-        Utility.sendRequestBody("/server/" + Vyhub.checkConfig().get("serverId"), Types.PATCH, Utility.createRequestBody(values));
+        Utility.sendRequestBody("/server/" + VyHub.checkConfig().get("serverId"), Types.PATCH, Utility.createRequestBody(values));
     }
 }

@@ -21,7 +21,7 @@ import org.json.simple.parser.ParseException;
 import static com.minecraft.server.SvRewards.loadExecuted;
 
 
-public class Vyhub extends JavaPlugin {
+public class VyHub extends JavaPlugin {
 
     private LuckPerms luckPerms;
 
@@ -68,7 +68,7 @@ public class Vyhub extends JavaPlugin {
         JSONParser jsonParser = new JSONParser();
         Map<String, String> configMap = new HashMap<>();
 
-        try (FileReader reader = new FileReader("plugins/Vyhub/config.json"))
+        try (FileReader reader = new FileReader("plugins/VyHub/config.json"))
         {
             JSONObject jsonObj = (JSONObject) jsonParser.parse(reader);
 
@@ -91,8 +91,8 @@ public class Vyhub extends JavaPlugin {
         configDetails.put("API-Key","");
         configDetails.put("Server-ID","");
 
-        getPlugin(Vyhub.class).getDataFolder().mkdir();
-        try (FileWriter fileWr = new FileWriter("plugins/Vyhub/config.json")) {
+        getPlugin(VyHub.class).getDataFolder().mkdir();
+        try (FileWriter fileWr = new FileWriter("plugins/VyHub/config.json")) {
             fileWr.write(configDetails.toJSONString());
             fileWr.flush();
         } catch (IOException e) {

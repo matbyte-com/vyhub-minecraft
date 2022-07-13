@@ -34,7 +34,7 @@ public class SvBans implements CommandExecutor {
 
         HttpResponse<String> response = Utility.sendRequest("/server/bundle/" + Utility.serverbundleID + "/ban?active=true", Types.GET);
 
-        try (FileWriter file = new FileWriter("plugins/Vyhub/banList.json")) {
+        try (FileWriter file = new FileWriter("plugins/VyHub/banList.json")) {
             file.write(response.body());
             file.flush();
 

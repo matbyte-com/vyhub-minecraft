@@ -2,7 +2,7 @@ package com.minecraft.lib;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.minecraft.Vyhub;
+import com.minecraft.VyHub;
 import com.minecraft.server.SvServer;
 import org.bukkit.command.CommandSender;
 import org.json.simple.JSONArray;
@@ -40,8 +40,8 @@ public class Utility {
 
     public static HttpResponse<String> sendRequestBody(String endpoint, Types type, String body) {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(Vyhub.checkConfig().get("apiUrl") + endpoint))
-                .setHeader("Authorization", "Bearer " + Vyhub.checkConfig().get("apiKey"))
+                .uri(URI.create(VyHub.checkConfig().get("apiUrl") + endpoint))
+                .setHeader("Authorization", "Bearer " + VyHub.checkConfig().get("apiKey"))
                 .method(type.name(), HttpRequest.BodyPublishers.ofString(body))
                 .build();
         HttpResponse<String> response = null;
@@ -55,8 +55,8 @@ public class Utility {
 
     public static HttpResponse<String> sendRequest(String endpoint, Types type) {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(Vyhub.checkConfig().get("apiUrl") + endpoint))
-                .setHeader("Authorization", "Bearer " + Vyhub.checkConfig().get("apiKey"))
+                .uri(URI.create(VyHub.checkConfig().get("apiUrl") + endpoint))
+                .setHeader("Authorization", "Bearer " + VyHub.checkConfig().get("apiKey"))
                 .method(type.name(), HttpRequest.BodyPublishers.noBody())
                 .build();
         HttpResponse<String> response = null;
@@ -72,7 +72,7 @@ public class Utility {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObj = null;
         if (SvServer.getServerInformation().statusCode() != 200) {
-            try (FileReader reader = new FileReader("plugins/Vyhub/serverInformation.json")) {
+            try (FileReader reader = new FileReader("plugins/VyHub/serverInformation.json")) {
 
                 JSONArray jsonArray = (JSONArray) jsonParser.parse(reader);
                 jsonObj = (JSONObject) jsonArray.get(0);

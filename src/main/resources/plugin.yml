@@ -1,6 +1,6 @@
-name: Vyhub
+name: VyHub
 version: '${project.version}'
-main: com.minecraft.Vyhub
+main: com.minecraft.VyHub
 api-version: 1.18
 
 

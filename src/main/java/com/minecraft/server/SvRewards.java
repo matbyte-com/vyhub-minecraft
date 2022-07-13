@@ -4,7 +4,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.minecraft.Entity.AppliedReward;
 import com.minecraft.Entity.Reward;
-import com.minecraft.Vyhub;
+import com.minecraft.VyHub;
 import com.minecraft.lib.Types;
 import com.minecraft.lib.Utility;
 import org.bukkit.Bukkit;
@@ -47,7 +47,7 @@ public class SvRewards implements Listener {
             stringBuilder.deleteCharAt(stringBuilder.length() - 1);
         }
 
-        HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + Utility.serverbundleID + "&for_server_id=" + Vyhub.checkConfig().get("serverId") + "&" +
+        HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + Utility.serverbundleID + "&for_server_id=" + VyHub.checkConfig().get("serverId") + "&" +
                stringBuilder, Types.GET);
 
         Gson gson = new Gson();
@@ -57,7 +57,7 @@ public class SvRewards implements Listener {
     }
 
     public static void getPlayerReward(Player player) {
-        HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + Utility.serverbundleID + "&for_server_id=" + Vyhub.checkConfig().get("serverId") +
+        HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + Utility.serverbundleID + "&for_server_id=" + VyHub.checkConfig().get("serverId") +
                 "&user_id=" +
                 SvUser.getUser(player.getUniqueId().toString()).getId(), Types.GET);
 
@@ -141,7 +141,7 @@ public class SvRewards implements Listener {
     }
 
     public static void saveExecuted() {
-        try (FileWriter fileWr = new FileWriter("plugins/Vyhub/rewardsQueue.txt")) {
+        try (FileWriter fileWr = new FileWriter("plugins/VyHub/rewardsQueue.txt")) {
             fileWr.write(executedRewards.stream().collect(Collectors.joining("\n")));
             fileWr.flush();
         } catch (IOException e) {
@@ -151,7 +151,7 @@ public class SvRewards implements Listener {
 
     public static void sendExecuted() {
         List<String> serverID = new ArrayList<>();
-        serverID.add(Vyhub.checkConfig().get("serverId"));
+        serverID.add(VyHub.checkConfig().get("serverId"));
         executedAndSentRewards = new ArrayList<>();
         HashMap<String, Object> values = new HashMap<>() {{
             put("executed_on", serverID);
@@ -169,7 +169,7 @@ public class SvRewards implements Listener {
     }
 
     public static void loadExecuted() {
-        File file = new File("plugins/Vyhub/rewardsQueue.txt");
+        File file = new File("plugins/VyHub/rewardsQueue.txt");
 
         if (!file.isFile()) {
             try {
@@ -179,7 +179,7 @@ public class SvRewards implements Listener {
             }
         }
 
-       try (Stream<String> lines = Files.lines(Paths.get("plugins/Vyhub/rewardsQueue.txt"))) {
+       try (Stream<String> lines = Files.lines(Paths.get("plugins/VyHub/rewardsQueue.txt"))) {
            executedRewards = lines.collect(Collectors.toList());
        } catch (IOException e) {
            throw new RuntimeException(e);
@@ -219,7 +219,7 @@ public class SvRewards implements Listener {
             public void run() {
                 executeReward(eventList, player.getUniqueId().toString());
             }
-        }.runTaskLater(Vyhub.getPlugin(Vyhub.class), 20);
+        }.runTaskLater(VyHub.getPlugin(VyHub.class), 20);
 
     }
 
