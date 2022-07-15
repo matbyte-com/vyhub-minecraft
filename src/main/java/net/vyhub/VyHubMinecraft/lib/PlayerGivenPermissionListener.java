@@ -1,7 +1,7 @@
-package com.minecraft.lib;
+package net.vyhub.VyHubMinecraft.lib;
 
 
-import com.minecraft.VyHub;
+import net.vyhub.VyHubMinecraft.VyHub;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.event.EventBus;

@@ -1,9 +1,10 @@
 name: VyHub
 version: '${project.version}'
-main: com.minecraft.VyHub
+main: net.vyhub.VyHubMinecraft.VyHub
 api-version: 1.18
 
-
+depend:
+  - LuckPerms
 commands:
   login:
     description: 'Login user for VyHub'

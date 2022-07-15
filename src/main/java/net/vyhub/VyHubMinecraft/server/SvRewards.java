@@ -1,12 +1,12 @@
-package com.minecraft.server;
+package net.vyhub.VyHubMinecraft.server;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.minecraft.Entity.AppliedReward;
-import com.minecraft.Entity.Reward;
-import com.minecraft.VyHub;
-import com.minecraft.lib.Types;
-import com.minecraft.lib.Utility;
+import net.vyhub.VyHubMinecraft.Entity.AppliedReward;
+import net.vyhub.VyHubMinecraft.Entity.Reward;
+import net.vyhub.VyHubMinecraft.VyHub;
+import net.vyhub.VyHubMinecraft.lib.Types;
+import net.vyhub.VyHubMinecraft.lib.Utility;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

@@ -1,9 +1,10 @@
-package com.minecraft.lib;
+package net.vyhub.VyHubMinecraft.lib;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.minecraft.VyHub;
-import com.minecraft.server.SvServer;
+import net.vyhub.VyHubMinecraft.VyHub;
+import net.vyhub.VyHubMinecraft.server.SvServer;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -44,9 +45,16 @@ public class Utility {
                 .setHeader("Authorization", "Bearer " + VyHub.checkConfig().get("apiKey"))
                 .method(type.name(), HttpRequest.BodyPublishers.ofString(body))
                 .build();
+
         HttpResponse<String> response = null;
         try {
+            Bukkit.getServer().getLogger().fine(String.format("%s %s with body: %s", type.name(), endpoint, body));
+
             response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() < 200 || response.statusCode() > 299) {
+                Bukkit.getServer().getLogger().severe(String.format("Error %d when accessing %s: %s", response.statusCode(), endpoint, response.body()));
+            }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -61,7 +69,13 @@ public class Utility {
                 .build();
         HttpResponse<String> response = null;
         try {
+            Bukkit.getServer().getLogger().fine(String.format("%s %s", type.name(), endpoint));
+
             response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() < 200 || response.statusCode() > 299) {
+                Bukkit.getServer().getLogger().severe(String.format("Error %d when accessing %s: %s", response.statusCode(), endpoint, response.body()));
+            }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }

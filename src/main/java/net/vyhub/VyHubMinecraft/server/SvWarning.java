@@ -1,8 +1,8 @@
-package com.minecraft.server;
+package net.vyhub.VyHubMinecraft.server;
 
-import com.minecraft.Entity.VyHubPlayer;
-import com.minecraft.lib.Types;
-import com.minecraft.lib.Utility;
+import net.vyhub.VyHubMinecraft.Entity.VyHubPlayer;
+import net.vyhub.VyHubMinecraft.lib.Types;
+import net.vyhub.VyHubMinecraft.lib.Utility;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

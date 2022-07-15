@@ -1,7 +1,7 @@
-package com.minecraft.server;
+package net.vyhub.VyHubMinecraft.server;
 
-import com.minecraft.lib.Types;
-import com.minecraft.lib.Utility;
+import net.vyhub.VyHubMinecraft.lib.Types;
+import net.vyhub.VyHubMinecraft.lib.Utility;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.user.User;

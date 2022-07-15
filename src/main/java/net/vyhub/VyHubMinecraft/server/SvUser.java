@@ -1,9 +1,9 @@
-package com.minecraft.server;
+package net.vyhub.VyHubMinecraft.server;
 
 import com.google.gson.Gson;
-import com.minecraft.Entity.VyHubPlayer;
-import com.minecraft.lib.Types;
-import com.minecraft.lib.Utility;
+import net.vyhub.VyHubMinecraft.Entity.VyHubPlayer;
+import net.vyhub.VyHubMinecraft.lib.Types;
+import net.vyhub.VyHubMinecraft.lib.Utility;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

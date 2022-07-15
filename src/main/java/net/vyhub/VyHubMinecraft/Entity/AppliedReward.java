@@ -1,4 +1,4 @@
-package com.minecraft.Entity;
+package net.vyhub.VyHubMinecraft.Entity;
 
 import java.util.List;
 import java.util.Map;

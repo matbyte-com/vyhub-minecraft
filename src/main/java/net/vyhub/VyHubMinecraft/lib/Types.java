@@ -1,4 +1,4 @@
-package com.minecraft.lib;
+package net.vyhub.VyHubMinecraft.lib;
 
 public enum Types {
     GET,
