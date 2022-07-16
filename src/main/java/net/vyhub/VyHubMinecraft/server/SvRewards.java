@@ -144,7 +144,7 @@ public class SvRewards implements Listener {
             fileWr.write(executedRewards.stream().collect(Collectors.joining("\n")));
             fileWr.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            Bukkit.getServer().getLogger().warning("VyHub API is not reachable");
         }
     }
 

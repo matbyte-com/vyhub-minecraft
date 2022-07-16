@@ -6,6 +6,7 @@ import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,21 +21,26 @@ public class SvServer {
     public static HttpResponse<String> getServerInformation() {
         HttpResponse<String> response = Utility.sendRequest("/server/?type=MINECRAFT", Types.GET);
 
+        if (response == null) {
+            new BukkitRunnable() {
+                public void run() {
+                   getServerInformation();
+                }
+            }.runTaskLater(VyHub.getPlugin(VyHub.class), 20L*60L);
+        }
+
 
         try (FileWriter fileWr = new FileWriter("plugins/VyHub/serverInformation.json")) {
             fileWr.write(response.body());
             fileWr.flush();
 
-
         } catch (IOException e) {
-            e.printStackTrace();
+            Bukkit.getServer().getLogger().severe("VyHub API is not reachable");
         }
         return response;
     }
 
     public static void patchServer() {
-        getServerInformation();
-
         List<Map<String, Object>> user_activities = new LinkedList<>();
 
         for (Player player : Bukkit.getOnlinePlayers()) {

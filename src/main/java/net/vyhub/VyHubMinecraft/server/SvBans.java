@@ -38,7 +38,7 @@ public class SvBans implements CommandExecutor {
             file.flush();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            Bukkit.getServer().getLogger().warning("VyHub API is not reachable");
         }
 
         JSONParser jsonParser = new JSONParser();
@@ -100,6 +100,7 @@ public class SvBans implements CommandExecutor {
 
                 String time = "";
                 if (expires.equals("forever")) {
+                    Bukkit.getServer().getLogger().warning("Time is forever");
                     time = null;
                 } else   {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -112,40 +113,37 @@ public class SvBans implements CommandExecutor {
                     time = String.valueOf((expiresDate.getTime() - createdDate.getTime())/1000);
                 }
 
-
                 if (!banPlayer.containsKey(uuid)) {
                     banPlayer.put(uuid, true);
 
                     String createdPlayerUUID = "";
                     for (Player sourcePlayer : Bukkit.getServer().getOnlinePlayers()) {
-                        if (sourcePlayer.getName().equals(source)) {
+                        if (sourcePlayer.getName().equals(source) && !source.equals("CONSOLE") && !source.equals("Server")) {
                             createdPlayerUUID = sourcePlayer.getUniqueId().toString();
                         }
                     }
 
-                    String vyHubPlayerUUID = "";
+                    String vyHubPlayerUUID = SvUser.getUser(uuid).getId();
                     String vyHubAdminPlayerUUID = "";
-                    for (VyHubPlayer player : SvUser.vyHubPlayers) {
-                        if (player.getIdentifier().equals(uuid)) {
-                            vyHubPlayerUUID = player.getId();
-                            System.out.println("UUID: " + player.getId());
-                        }
-                        if (player.getIdentifier().equals(createdPlayerUUID)) {
-                            vyHubAdminPlayerUUID = player.getId();
-                        }
+                    if (!source.equals("CONSOLE") && !source.equals("Server")) {
+                        vyHubAdminPlayerUUID = SvUser.getUser(createdPlayerUUID).getId();
                     }
 
-                    String finalVyHubPlayerUUID = vyHubPlayerUUID;
                     String finalTime = time;
+                    String finalCreated = created;
                     HashMap<String, Object> values = new HashMap<>() {{
                         put("length", finalTime);
                         put("reason", reason);
                         put("serverbundle_id", Utility.serverbundleID);
-                        put("user_id", finalVyHubPlayerUUID);
-                        put("created_on", created.replaceFirst(" ","T").replaceAll("[ ].*$", ".000Z"));
+                        put("user_id", vyHubPlayerUUID);
+                        put("created_on", finalCreated.replaceFirst(" ","T").replaceAll("[ ].*$", ".000Z"));
                     }};
-
-                    Utility.sendRequestBody("/ban/?morph_user_id="+ vyHubAdminPlayerUUID, Types.POST, Utility.createRequestBody(values));
+                    if (!source.equals("CONSOLE") && !source.equals("Server")) {
+                        Utility.sendRequestBody("/ban/?morph_user_id=" + vyHubAdminPlayerUUID, Types.POST, Utility.createRequestBody(values));
+                    } else {
+                        HttpResponse<String> response = Utility.sendRequestBody("/ban/", Types.POST, Utility.createRequestBody(values));
+                        Bukkit.getServer().getLogger().warning(response.body());
+                    }
                 }
             }
         } catch (ParseException | IOException | java.text.ParseException e) {
@@ -164,19 +162,21 @@ public class SvBans implements CommandExecutor {
                 String uuid = object.get("uuid").toString();
                 String expires = object.get("expires").toString();
 
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Date expiresDate = sdf.parse(expires.replaceAll("[+].*$", ""));
+                if (!expires.equals("forever")) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Date expiresDate = sdf.parse(expires.replaceAll("[+].*$", ""));
 
-                uuidMcList.add(uuid);
+                    uuidMcList.add(uuid);
 
-                if (!uuidIdMap.containsKey(uuid) && !banPlayer.get(uuid)) {
-                    Bukkit.getBanList(BanList.Type.NAME).pardon(uuid);
-                    banPlayer.remove(uuid);
-                }
+                    if (!uuidIdMap.containsKey(uuid) && !banPlayer.get(uuid)) {
+                        Bukkit.getBanList(BanList.Type.NAME).pardon(uuid);
+                        banPlayer.remove(uuid);
+                    }
 
-                if (expiresDate.before(new Date())) {
-                    Bukkit.getBanList(BanList.Type.NAME).pardon(uuid);
-                    banPlayer.remove(uuid);
+                    if (expiresDate.before(new Date())) {
+                        Bukkit.getBanList(BanList.Type.NAME).pardon(uuid);
+                        banPlayer.remove(uuid);
+                    }
                 }
             }
 
@@ -195,8 +195,8 @@ public class SvBans implements CommandExecutor {
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        Player player = (Player) sender;
-        if (player.isOp()) {
+
+        if (sender.isOp()) {
             if (args.length == 0) {
                 Utility.sendUsage(sender, "/timeban <Player> <time in minutes> <reason>");
                 return true;
@@ -205,8 +205,8 @@ public class SvBans implements CommandExecutor {
             //args[0] = Player, args[1] = time, args[2] =reason
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (p.getName().equals(args[0])) {
-                    player.kickPlayer(args[2]);
-                    Bukkit.getBanList(BanList.Type.NAME).addBan(p.getUniqueId().toString(), args[2], new Date(Calendar.getInstance().getTimeInMillis() + (Long.parseLong(args[1]) * 60 * 1000)), player.getName());
+                    p.kickPlayer(args[2]);
+                    Bukkit.getBanList(BanList.Type.NAME).addBan(p.getUniqueId().toString(), args[2], new Date(Calendar.getInstance().getTimeInMillis() + (Long.parseLong(args[1]) * 60 * 1000)), sender.getName());
                 }
             }
             return false;

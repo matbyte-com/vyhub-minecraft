@@ -32,6 +32,7 @@ public class VyHub extends JavaPlugin {
     private static BukkitScheduler scheduler = Bukkit.getScheduler();
 
     private static int readyCheckTaskID;
+    private static int playerTimeID;
 
     @Override
     public void onEnable() {
@@ -53,10 +54,12 @@ public class VyHub extends JavaPlugin {
         JavaPlugin plugin = getPlugin(VyHub.class);
 
         scheduler.cancelTask(readyCheckTaskID);
+        scheduler.cancelTask(playerTimeID);
 
         listenerRegistration();
         commandRegistration();
         SvRewards.loadExecuted();
+        SvServer.getServerInformation();
 
         scheduler.runTaskTimer(plugin, SvServer::patchServer, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(plugin, SvBans::getVyHubBans, 20L*1L, 20L*60L);
@@ -134,7 +137,9 @@ public class VyHub extends JavaPlugin {
 
         HttpResponse<String> response = Utility.sendRequest("/user/current", Types.GET);
 
-        if (response.statusCode() != 200 && response.statusCode() != 307) {
+        if (response == null) {
+            playerTimeID = scheduler.runTaskTimer(plugin, SvStatistics::playerTime, 20L*1L, 20L*60L).getTaskId();
+            commandRegistration();
             logger.warning("Cannot connect to VyHub API! Please follow the installation instructions.");
             return;
         }

@@ -1,6 +1,7 @@
 package net.vyhub.VyHubMinecraft.server;
 
 import net.vyhub.VyHubMinecraft.Entity.VyHubPlayer;
+import net.vyhub.VyHubMinecraft.VyHub;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
 import org.bukkit.Bukkit;
@@ -8,18 +9,17 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SvWarning implements CommandExecutor {
-
     public static void createWarning(Player player, String reason) {
-        String vyHubPlayerUUID = "";
-        for (VyHubPlayer vyHubPlayer : SvUser.vyHubPlayers) {
-            if (vyHubPlayer.getIdentifier().equals(player.getUniqueId().toString())) {
-                vyHubPlayerUUID = vyHubPlayer.getId();
-            }
-        }
+        String vyHubPlayerUUID = SvUser.getUser(player.getUniqueId().toString()).getId();
 
         String finalVyHubPlayerUUID = vyHubPlayerUUID;
         HashMap<String, Object> values = new HashMap<>() {{
@@ -28,7 +28,16 @@ public class SvWarning implements CommandExecutor {
             put("user_id", finalVyHubPlayerUUID);
         }};
 
-        Utility.sendRequestBody("/warning/?morph_user_id=" + vyHubPlayerUUID, Types.POST, Utility.createRequestBody(values));
+        HttpResponse<String> response = Utility.sendRequestBody("/warning/?morph_user_id=" + vyHubPlayerUUID, Types.POST, Utility.createRequestBody(values));
+
+        if (response == null) {
+            new BukkitRunnable() {
+                public void run() {
+                    createWarning(player, reason);
+                }
+            }.runTaskLater(VyHub.getPlugin(VyHub.class), 20L*60L);
+        }
+
     }
 
     @Override
@@ -44,6 +53,8 @@ public class SvWarning implements CommandExecutor {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (p.getName().equals(args[0])) {
                     createWarning(p, args[1]);
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(),  String.format("msg %s You have received a warning", p.getName()));
+                    SvBans.getVyHubBans();
                 }
             }
             return false;

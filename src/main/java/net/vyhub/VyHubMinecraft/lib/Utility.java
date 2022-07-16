@@ -33,7 +33,7 @@ public class Utility {
         try {
             requestBody = objectMapper.writeValueAsString(values);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            Bukkit.getServer().getLogger().severe("Can't create Request Body");
         }
 
         return requestBody;
@@ -56,7 +56,7 @@ public class Utility {
                 Bukkit.getServer().getLogger().severe(String.format("Error %d when accessing %s: %s", response.statusCode(), endpoint, response.body()));
             }
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            Bukkit.getServer().getLogger().severe("VyHub API is not reachable");
         }
         return response;
     }
@@ -77,7 +77,7 @@ public class Utility {
                 Bukkit.getServer().getLogger().severe(String.format("Error %d when accessing %s: %s", response.statusCode(), endpoint, response.body()));
             }
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            Bukkit.getServer().getLogger().severe("VyHub API is not reachable");
         }
         return response;
     }
@@ -85,24 +85,15 @@ public class Utility {
     public static JSONObject getServerInformationObject() {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObj = null;
-        if (SvServer.getServerInformation().statusCode() != 200) {
-            try (FileReader reader = new FileReader("plugins/VyHub/serverInformation.json")) {
 
-                JSONArray jsonArray = (JSONArray) jsonParser.parse(reader);
-                jsonObj = (JSONObject) jsonArray.get(0);
-
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
-            }
-        } else {
-            try {
-                JSONArray jsonArray = (JSONArray) jsonParser.parse(SvServer.getServerInformation().body());
-                jsonObj = (JSONObject) jsonArray.get(0);
-
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+        try (FileReader reader = new FileReader("plugins/VyHub/serverInformation.json")) {
+            JSONArray jsonArray = (JSONArray) jsonParser.parse(reader);
+            jsonObj = (JSONObject) jsonArray.get(0);
+        } catch (IOException | ParseException e) {
+            Bukkit.getServer().getLogger().severe("ServerInformation doesn't exists");
+            SvServer.getServerInformation();
         }
+
         JSONObject serverbundleObject = (JSONObject) jsonObj.get("serverbundle");
         serverbundleID = serverbundleObject.get("id").toString();
         return jsonObj;

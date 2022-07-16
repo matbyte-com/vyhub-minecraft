@@ -13,10 +13,11 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SvUser implements Listener {
 
-    public static List<VyHubPlayer> vyHubPlayers = new ArrayList<>();
+    public static Map<String, VyHubPlayer> vyHubPlayers = new HashMap<>();
 
     @EventHandler
     public static void checkUserExists(PlayerJoinEvent event) {
@@ -26,10 +27,8 @@ public class SvUser implements Listener {
 
     public static VyHubPlayer getUser(String UUID) {
         if (vyHubPlayers != null) {
-            for (VyHubPlayer player : vyHubPlayers) {
-                if (player.getIdentifier().equals(UUID)) {
-                    return player;
-                }
+            if (vyHubPlayers.containsKey(UUID)) {
+                return vyHubPlayers.get(UUID);
             }
         }
 
@@ -46,7 +45,7 @@ public class SvUser implements Listener {
         Gson gson = new Gson();
         VyHubPlayer vyHubPlayer = gson.fromJson(userInformation, VyHubPlayer.class);
 
-        vyHubPlayers.add(vyHubPlayer);
+        vyHubPlayers.put(UUID, vyHubPlayer);
         return vyHubPlayer;
     }
 

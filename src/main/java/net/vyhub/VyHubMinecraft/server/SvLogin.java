@@ -30,6 +30,9 @@ public class SvLogin implements CommandExecutor {
         if (response.statusCode() != 200) {
             Utility.sendUsage(sender, "/login <UUID>");
             return true;
+        } else if (response == null) {
+            sender.sendMessage("§aVyHub API is not available. Try it again later!");
+            return  false;
         }
         sender.sendMessage("§aSuccessfully logged in!");
         return false;
