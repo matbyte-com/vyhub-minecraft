@@ -76,7 +76,6 @@ public class SvBans implements CommandExecutor {
                     banPlayer.put(playerUUID, false);
                 }
             }
-            getMinecraftBans();
             unban(uuidIDMap);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -141,14 +140,14 @@ public class SvBans implements CommandExecutor {
                     if (!source.equals("CONSOLE") && !source.equals("Server")) {
                         Utility.sendRequestBody("/ban/?morph_user_id=" + vyHubAdminPlayerUUID, Types.POST, Utility.createRequestBody(values));
                     } else {
-                        HttpResponse<String> response = Utility.sendRequestBody("/ban/", Types.POST, Utility.createRequestBody(values));
-                        Bukkit.getServer().getLogger().warning(response.body());
+                        Utility.sendRequestBody("/ban/", Types.POST, Utility.createRequestBody(values));
                     }
                 }
             }
         } catch (ParseException | IOException | java.text.ParseException e) {
             throw new RuntimeException(e);
         }
+        getVyHubBans();
     }
 
     private static void unban(Map<String, String> uuidIdMap) {

@@ -62,7 +62,7 @@ public class VyHub extends JavaPlugin {
         SvServer.getServerInformation();
 
         scheduler.runTaskTimer(plugin, SvServer::patchServer, 20L*1L, 20L*60L);
-        scheduler.runTaskTimer(plugin, SvBans::getVyHubBans, 20L*1L, 20L*60L);
+        scheduler.runTaskTimer(plugin, SvBans::getMinecraftBans, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(plugin, SvStatistics::playerTime, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(plugin, SvRewards::getRewards, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(plugin, SvRewards::runDirectRewards, 20L*1L, 20L*60L);
