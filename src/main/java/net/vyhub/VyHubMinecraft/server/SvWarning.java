@@ -46,13 +46,14 @@ public class SvWarning implements CommandExecutor {
             }
 
             //args[0] = Player, args[1] =reason
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                if (p.getName().equals(args[0])) {
-                    createWarning(p, args[1]);
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(),  String.format("msg %s You have received a warning", p.getName()));
-                    SvBans.getVyHubBans();
-                }
+            Player p = Bukkit.getPlayer(args[0]);
+
+            if (p != null) {
+                createWarning(p, args[1]);
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),  String.format("msg %s You have received a warning", p.getName()));
+                SvBans.getVyHubBans();
             }
+
             return false;
         }
         return true;

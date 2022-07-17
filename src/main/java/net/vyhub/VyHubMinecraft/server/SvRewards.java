@@ -108,13 +108,7 @@ public class SvRewards implements Listener {
             String _playerID = entry.getKey();
             List<AppliedReward> appliedRewards = entry.getValue();
 
-            Player player = null;
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                if (p.getUniqueId().toString().equals(_playerID)) {
-                    player = p;
-                    break;
-                }
-            }
+            Player player = Bukkit.getPlayer(_playerID);
 
             if (player == null) {
                 continue;

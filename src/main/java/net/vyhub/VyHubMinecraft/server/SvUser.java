@@ -39,6 +39,10 @@ public class SvUser implements Listener {
     }
 
     public static VyHubUser getUser(String UUID) {
+        if (UUID == null || UUID.isEmpty()) {
+            throw new IllegalArgumentException("UUID may not be empty or null.");
+        }
+
         if (vyHubPlayers != null) {
             if (vyHubPlayers.containsKey(UUID)) {
                 return vyHubPlayers.get(UUID);

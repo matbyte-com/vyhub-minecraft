@@ -1,6 +1,7 @@
 package net.vyhub.VyHubMinecraft.server;
 
 
+import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
 import org.bukkit.BanList;
@@ -19,14 +20,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import java.net.http.HttpResponse;
-import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class SvBans implements CommandExecutor {
-
     private static Map<String, Boolean> banPlayer = new HashMap<>();
 
     private static DateTimeFormatter isoDateFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
@@ -44,9 +43,8 @@ public class SvBans implements CommandExecutor {
         try (FileWriter file = new FileWriter("plugins/VyHub/banList.json")) {
             file.write(response.body());
             file.flush();
-
         } catch (IOException e) {
-            Bukkit.getServer().getLogger().warning("VyHub API is not reachable");
+            e.printStackTrace();
         }
 
         JSONParser jsonParser = new JSONParser();
@@ -73,11 +71,11 @@ public class SvBans implements CommandExecutor {
                 }
 
                 if (!banPlayer.containsKey(playerUUID)) {
-                    for (Player banPlayer : Bukkit.getServer().getOnlinePlayers()) {
-                        if (banPlayer.getUniqueId().toString().equals(playerUUID)) {
-                            banPlayer.kickPlayer(reason);
-                        }
+                    Player bannnedPlayer = Bukkit.getPlayer(playerUUID);
+                    if (bannnedPlayer != null) {
+                        bannnedPlayer.kickPlayer(reason);
                     }
+
                     Bukkit.getBanList(BanList.Type.NAME).addBan(playerUUID, reason, date, "VyHub");
                     banPlayer.put(playerUUID, false);
                 } else if (banPlayer.get(playerUUID)) {
@@ -105,30 +103,37 @@ public class SvBans implements CommandExecutor {
                 String created = object.get("created").toString();
                 String source = object.get("source").toString();
 
-                Long time = null;
-                ZonedDateTime createdDate = ZonedDateTime.parse(created, mcDateFormatter);
-
-                if (!expires.equals("forever")) {
-                    ZonedDateTime expiresDate = ZonedDateTime.parse(expires, mcDateFormatter);
-                    time = expiresDate.toEpochSecond() - createdDate.toEpochSecond();
-                }
-
                 if (!banPlayer.containsKey(uuid)) {
                     banPlayer.put(uuid, true);
 
-                    String createdPlayerUUID = "";
-                    for (Player sourcePlayer : Bukkit.getServer().getOnlinePlayers()) {
-                        if (sourcePlayer.getName().equals(source) && !source.equals("CONSOLE") && !source.equals("Server")) {
-                            createdPlayerUUID = sourcePlayer.getUniqueId().toString();
+                    Long time = null;
+                    ZonedDateTime createdDate = ZonedDateTime.parse(created, mcDateFormatter);
+
+                    if (!expires.equals("forever")) {
+                        ZonedDateTime expiresDate = ZonedDateTime.parse(expires, mcDateFormatter);
+                        time = expiresDate.toEpochSecond() - createdDate.toEpochSecond();
+                    }
+
+                    String vyHubAdminUserUUID = null;
+
+                    if (!source.equals("CONSOLE") && !source.equals("Server")) {
+                        Player sourcePlayer = Bukkit.getPlayer(source);
+
+                        if (sourcePlayer != null) {
+                            VyHubUser admin = SvUser.getUser(sourcePlayer.getUniqueId().toString());
+
+                            if (admin != null) {
+                                vyHubAdminUserUUID = admin.getId();
+                            }
                         }
                     }
 
-                    String vyHubPlayerUUID = SvUser.getUser(uuid).getId();
-                    String vyHubAdminPlayerUUID = "";
-                    if (!source.equals("CONSOLE") && !source.equals("Server")) {
-                        vyHubAdminPlayerUUID = SvUser.getUser(createdPlayerUUID).getId();
+                    VyHubUser user = SvUser.getUser(uuid);
+                    if (user == null) {
+                        return;
                     }
 
+                    String vyHubPlayerUUID = user.getId();
                     Long finalTime = time;
                     String finalCreated = createdDate.format(isoDateFormatter);
                     HashMap<String, Object> values = new HashMap<>() {{
@@ -138,8 +143,9 @@ public class SvBans implements CommandExecutor {
                         put("user_id", vyHubPlayerUUID);
                         put("created_on", finalCreated);
                     }};
-                    if (!source.equals("CONSOLE") && !source.equals("Server")) {
-                        Utility.sendRequestBody("/ban/?morph_user_id=" + vyHubAdminPlayerUUID, Types.POST, Utility.createRequestBody(values));
+
+                    if (vyHubAdminUserUUID != null) {
+                        Utility.sendRequestBody("/ban/?morph_user_id=" + vyHubAdminUserUUID, Types.POST, Utility.createRequestBody(values));
                     } else {
                         Utility.sendRequestBody("/ban/", Types.POST, Utility.createRequestBody(values));
                     }
@@ -179,14 +185,16 @@ public class SvBans implements CommandExecutor {
                 }
             }
 
-            for (String uuidVy : uuidIdMap.keySet()) {
-                if (!uuidMcList.contains(uuidVy) && !banPlayer.get(uuidVy)) {
-                    banPlayer.remove(uuidVy);
+            for (String playerUUID : uuidIdMap.keySet()) {
+                if (!uuidMcList.contains(playerUUID) && !banPlayer.get(playerUUID)) {
+                    banPlayer.remove(playerUUID);
+
+                    Bukkit.getBanList(BanList.Type.NAME).pardon(playerUUID);
 
                     HashMap<String, Object> values = new HashMap<>();
                     values.put("status", "UNBANNED");
 
-                    Utility.sendRequestBody("/ban/"+ uuidIdMap.get(uuidVy), Types.PATCH, Utility.createRequestBody(values));
+                    Utility.sendRequestBody("/ban/"+ uuidIdMap.get(playerUUID), Types.PATCH, Utility.createRequestBody(values));
                 }
             }
         } catch (ParseException | IOException fileNotFoundException) {
@@ -203,11 +211,10 @@ public class SvBans implements CommandExecutor {
             }
 
             //args[0] = Player, args[1] = time, args[2] =reason
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                if (p.getName().equals(args[0])) {
-                    p.kickPlayer(args[2]);
-                    Bukkit.getBanList(BanList.Type.NAME).addBan(p.getUniqueId().toString(), args[2], new Date(Calendar.getInstance().getTimeInMillis() + (Long.parseLong(args[1]) * 60 * 1000)), sender.getName());
-                }
+            Player p = Bukkit.getPlayer(args[0]);
+            if (p != null) {
+                p.kickPlayer(args[2]);
+                Bukkit.getBanList(BanList.Type.NAME).addBan(p.getUniqueId().toString(), args[2], new Date(Calendar.getInstance().getTimeInMillis() + (Long.parseLong(args[1]) * 60 * 1000)), sender.getName());
             }
             return false;
         }
