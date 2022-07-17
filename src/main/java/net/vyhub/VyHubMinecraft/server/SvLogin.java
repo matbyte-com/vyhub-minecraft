@@ -27,7 +27,7 @@ public class SvLogin implements CommandExecutor {
 
         HttpResponse<String> response =  Utility.sendRequestBody("/auth/request/"+ args[0], Types.PATCH, Utility.createRequestBody(values));
 
-        if (response.statusCode() != 200) {
+        if (response != null && response.statusCode() != 200) {
             Utility.sendUsage(sender, "/login <UUID>");
             return true;
         } else if (response == null) {

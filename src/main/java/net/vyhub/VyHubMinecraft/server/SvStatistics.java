@@ -1,6 +1,7 @@
 package net.vyhub.VyHubMinecraft.server;
 
 
+import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
 import org.bukkit.Bukkit;
@@ -18,56 +19,66 @@ public class SvStatistics {
     public static String checkDefinition(){
         HttpResponse<String> response = Utility.sendRequest("/user/attribute/definition/playtime", Types.GET);
 
-        if (response.statusCode() == 200) {
-            JSONParser jsonParser = new JSONParser();
-            JSONObject object = null;
-            try {
-                object = (JSONObject) jsonParser.parse(response.body());
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
+        if (response != null) {
+            if (response.statusCode() == 200) {
+                JSONParser jsonParser = new JSONParser();
+                JSONObject object = null;
+                try {
+                    object = (JSONObject) jsonParser.parse(response.body());
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+                return object.get("id").toString();
+            } else if (response.statusCode() == 404) {
+                HashMap<String, Object> values = new HashMap<>() {{
+                    put("name", "playtime");
+                    put("title", "Play Time");
+                    put("unit", "HOURS");
+                    put("type", "ACCUMULATED");
+                    put("accumulation_interval", "day");
+                    put("unspecific", true);
+                }};
+
+                HttpResponse<String> resp = Utility.sendRequestBody("/user/attribute/definition", Types.POST, Utility.createRequestBody(values));
+
+                if (resp != null && resp.statusCode() == 200) {
+                    JSONParser jsonParser = new JSONParser();
+                    JSONObject object = null;
+                    try {
+                        object = (JSONObject) jsonParser.parse(resp.body());
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return object.get("id").toString();
+                }
             }
-            return object.get("id").toString();
         }
 
-        HashMap<String, Object> values = new HashMap<>() {{
-            put("name", "playtime");
-            put("title", "Play Time");
-            put("unit", "HOURS");
-            put("type", "ACCUMULATED");
-            put("accumulation_interval", "day");
-            put("unspecific", true);
-        }};
-
-        HttpResponse<String> resp = Utility.sendRequestBody("/user/attribute/definition", Types.POST, Utility.createRequestBody(values));
-
-        JSONParser jsonParser = new JSONParser();
-        JSONObject object = null;
-        try {
-            object = (JSONObject) jsonParser.parse(resp.body());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-        return object.get("id").toString();
+        return null;
     }
 
     public static void sendPlayerTime() {
         String definitionID = checkDefinition();
 
+        if (definitionID != null) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                VyHubUser user = SvUser.getUser(player.getUniqueId().toString());
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
+                if (user != null) {
+                    if (Math.round(playerTime.get(player.getUniqueId().toString()) / 60) < 1 ) {
+                        continue;
+                    }
+                    HashMap<String, Object> values = new HashMap<>() {{
+                        put("definition_id", definitionID);
+                        put("user_id", user.getId());
+                        put("serverbundle_id", Utility.serverbundleID);
+                        put("value",String.valueOf(Math.round(playerTime.get(player.getUniqueId().toString()) / 60)));
+                    }};
 
-            if (Math.round(playerTime.get(player.getUniqueId().toString()) / 60) < 1 ) {
-                continue;
+                    Utility.sendRequestBody("/user/attribute/", Types.POST, Utility.createRequestBody(values));
+                    resetPlayerTime(player);
+                }
             }
-            HashMap<String, Object> values = new HashMap<>() {{
-                put("definition_id", definitionID);
-                put("user_id", SvUser.getUser(player.getUniqueId().toString()).getId());
-                put("serverbundle_id", Utility.serverbundleID);
-                put("value",String.valueOf(Math.round(playerTime.get(player.getUniqueId().toString()) / 60)));
-            }};
-
-            Utility.sendRequestBody("/user/attribute/", Types.POST, Utility.createRequestBody(values));
-            resetPlayerTime(player);
         }
     }
 

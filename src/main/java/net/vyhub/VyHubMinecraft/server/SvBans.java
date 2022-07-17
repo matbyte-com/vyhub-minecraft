@@ -1,7 +1,6 @@
 package net.vyhub.VyHubMinecraft.server;
 
 
-import net.vyhub.VyHubMinecraft.Entity.VyHubPlayer;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
 import org.bukkit.BanList;
@@ -22,16 +21,25 @@ import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class SvBans implements CommandExecutor {
 
     private static Map<String, Boolean> banPlayer = new HashMap<>();
 
+    private static DateTimeFormatter isoDateFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+    private static DateTimeFormatter mcDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
+
 
     public static void getVyHubBans() {
 
         HttpResponse<String> response = Utility.sendRequest("/server/bundle/" + Utility.serverbundleID + "/ban?active=true", Types.GET);
+
+        if (response == null || response.statusCode() !=  200) {
+            return;
+        }
 
         try (FileWriter file = new FileWriter("plugins/VyHub/banList.json")) {
             file.write(response.body());
@@ -97,19 +105,12 @@ public class SvBans implements CommandExecutor {
                 String created = object.get("created").toString();
                 String source = object.get("source").toString();
 
-                String time = "";
-                if (expires.equals("forever")) {
-                    Bukkit.getServer().getLogger().warning("Time is forever");
-                    time = null;
-                } else   {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    Date createdDate = null;
-                    Date expiresDate = null;
+                Long time = null;
+                ZonedDateTime createdDate = ZonedDateTime.parse(created, mcDateFormatter);
 
-                    createdDate = sdf.parse(created.replaceAll("[+].*$", ""));
-                    expiresDate = sdf.parse(expires.replaceAll("[+].*$", ""));
-
-                    time = String.valueOf((expiresDate.getTime() - createdDate.getTime())/1000);
+                if (!expires.equals("forever")) {
+                    ZonedDateTime expiresDate = ZonedDateTime.parse(expires, mcDateFormatter);
+                    time = expiresDate.toEpochSecond() - createdDate.toEpochSecond();
                 }
 
                 if (!banPlayer.containsKey(uuid)) {
@@ -128,14 +129,14 @@ public class SvBans implements CommandExecutor {
                         vyHubAdminPlayerUUID = SvUser.getUser(createdPlayerUUID).getId();
                     }
 
-                    String finalTime = time;
-                    String finalCreated = created;
+                    Long finalTime = time;
+                    String finalCreated = createdDate.format(isoDateFormatter);
                     HashMap<String, Object> values = new HashMap<>() {{
                         put("length", finalTime);
                         put("reason", reason);
                         put("serverbundle_id", Utility.serverbundleID);
                         put("user_id", vyHubPlayerUUID);
-                        put("created_on", finalCreated.replaceFirst(" ","T").replaceAll("[ ].*$", ".000Z"));
+                        put("created_on", finalCreated);
                     }};
                     if (!source.equals("CONSOLE") && !source.equals("Server")) {
                         Utility.sendRequestBody("/ban/?morph_user_id=" + vyHubAdminPlayerUUID, Types.POST, Utility.createRequestBody(values));
@@ -144,7 +145,7 @@ public class SvBans implements CommandExecutor {
                     }
                 }
             }
-        } catch (ParseException | IOException | java.text.ParseException e) {
+        } catch (ParseException | IOException e) {
             throw new RuntimeException(e);
         }
         getVyHubBans();
@@ -162,8 +163,7 @@ public class SvBans implements CommandExecutor {
                 String expires = object.get("expires").toString();
 
                 if (!expires.equals("forever")) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    Date expiresDate = sdf.parse(expires.replaceAll("[+].*$", ""));
+                    ZonedDateTime expiresDate = ZonedDateTime.parse(expires, mcDateFormatter);
 
                     uuidMcList.add(uuid);
 
@@ -172,7 +172,7 @@ public class SvBans implements CommandExecutor {
                         banPlayer.remove(uuid);
                     }
 
-                    if (expiresDate.before(new Date())) {
+                    if (expiresDate.isBefore(ZonedDateTime.now())) {
                         Bukkit.getBanList(BanList.Type.NAME).pardon(uuid);
                         banPlayer.remove(uuid);
                     }
@@ -183,13 +183,14 @@ public class SvBans implements CommandExecutor {
                 if (!uuidMcList.contains(uuidVy) && !banPlayer.get(uuidVy)) {
                     banPlayer.remove(uuidVy);
 
-                    Utility.sendRequest("/ban/"+ uuidIdMap.get(uuidVy), Types.DELETE);
+                    HashMap<String, Object> values = new HashMap<>();
+                    values.put("status", "UNBANNED");
+
+                    Utility.sendRequestBody("/ban/"+ uuidIdMap.get(uuidVy), Types.PATCH, Utility.createRequestBody(values));
                 }
             }
         } catch (ParseException | IOException fileNotFoundException) {
             fileNotFoundException.printStackTrace();
-        } catch (java.text.ParseException e) {
-            throw new RuntimeException(e);
         }
     }
     @Override
@@ -197,7 +198,7 @@ public class SvBans implements CommandExecutor {
 
         if (sender.isOp()) {
             if (args.length == 0) {
-                Utility.sendUsage(sender, "/timeban <Player> <time in minutes> <reason>");
+                Utility.sendUsage(sender, "/timeban <player> <time in minutes> <reason>");
                 return true;
             }
 

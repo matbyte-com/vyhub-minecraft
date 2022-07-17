@@ -1,6 +1,7 @@
 package net.vyhub.VyHubMinecraft.server;
 
 
+import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
 import net.vyhub.VyHubMinecraft.VyHub;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
@@ -21,12 +22,13 @@ public class SvServer {
     public static HttpResponse<String> getServerInformation() {
         HttpResponse<String> response = Utility.sendRequest("/server/?type=MINECRAFT", Types.GET);
 
-        if (response == null) {
+        if (response == null || response.statusCode() != 200) {
             new BukkitRunnable() {
                 public void run() {
                    getServerInformation();
                 }
             }.runTaskLater(VyHub.getPlugin(VyHub.class), 20L*60L);
+            return null;
         }
 
 
@@ -44,16 +46,22 @@ public class SvServer {
         List<Map<String, Object>> user_activities = new LinkedList<>();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            HashMap<String, Object> map = new HashMap<>();
-            HashMap<String, String> extra = new HashMap<>();
-            extra.put("Ping", player.getPing() + " ms");
-           // extra.put("World", player.getWorld().getName());
+            VyHubUser user = SvUser.getUser(player.getUniqueId().toString());
 
-            map.put("user_id", SvUser.getUser(player.getUniqueId().toString()).getId());
-            map.put("extra", extra);
+            if (user != null) {
+                HashMap<String, Object> map = new HashMap<>();
+                HashMap<String, String> extra = new HashMap<>();
+                extra.put("Ping", player.getPing() + " ms");
+                // extra.put("World", player.getWorld().getName());
 
-            user_activities.add(map);
+                map.put("user_id", user.getId());
+                map.put("extra", extra);
+
+                user_activities.add(map);
+            }
         }
+
+        Utility.getServerInformationObject();
 
         HashMap<String, Object> values = new HashMap<>() {{
             put("users_max", String.valueOf(Bukkit.getMaxPlayers()));
@@ -61,7 +69,6 @@ public class SvServer {
             put("user_activities", user_activities);
             put("is_alive", "true");
         }};
-        Utility.getServerInformationObject();
 
         Utility.sendRequestBody("/server/" + VyHub.checkConfig().get("serverId"), Types.PATCH, Utility.createRequestBody(values));
     }

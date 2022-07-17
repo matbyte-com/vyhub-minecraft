@@ -1,6 +1,5 @@
 package net.vyhub.VyHubMinecraft.server;
 
-import net.vyhub.VyHubMinecraft.Entity.VyHubPlayer;
 import net.vyhub.VyHubMinecraft.VyHub;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
@@ -12,10 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class SvWarning implements CommandExecutor {
     public static void createWarning(Player player, String reason) {

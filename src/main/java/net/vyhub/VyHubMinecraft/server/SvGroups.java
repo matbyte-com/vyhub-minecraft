@@ -1,5 +1,6 @@
 package net.vyhub.VyHubMinecraft.server;
 
+import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
 import net.luckperms.api.LuckPerms;
@@ -21,6 +22,7 @@ import org.json.simple.parser.ParseException;
 
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class SvGroups implements Listener {
@@ -29,9 +31,18 @@ public class SvGroups implements Listener {
     public static void syncGroups(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         JSONParser jsonParser = new JSONParser();
+        VyHubUser user = SvUser.getUser(player.getUniqueId().toString());
 
-        HttpResponse<String> response = Utility.sendRequest("/user/" + SvUser.getUser(player.getUniqueId().toString()).getId() + "/group?serverbundle_id=" + Utility.serverbundleID,
+        if (user == null) {
+            return;
+        }
+
+        HttpResponse<String> response = Utility.sendRequest("/user/" + user.getId() + "/group?serverbundle_id=" + Utility.serverbundleID,
                 Types.GET);
+
+        if (response == null  || response.statusCode() != 200) {
+            return;
+        }
 
         try {
             JSONArray jsonArray = (JSONArray) jsonParser.parse(response.body());
@@ -61,15 +72,20 @@ public class SvGroups implements Listener {
             LuckPerms api = provider.getProvider();
             User user = api.getUserManager().getUser(player.getUniqueId());
             List<Node> nodes = new ArrayList<>();
+            Collection<Node> currentNodes = user.getNodes();
+
             for (String groupName : allGroups) {
                 if (api.getGroupManager().getGroup(groupName) != null) {
                     InheritanceNode node = InheritanceNode.builder(groupName).value(true).build();
                     nodes.add(node);
-                    DataMutateResult result = user.data().add(node);
-                    player.sendMessage(ChatColor.GOLD + "You are added to: " + groupName);
+
+                    if (!currentNodes.contains(node)) {
+                        DataMutateResult result = user.data().add(node);
+                        player.sendMessage(ChatColor.GOLD + "You are added to: " + groupName);
+                    }
                 }
             }
-            for (Node n : user.getNodes()) {
+            for (Node n : currentNodes) {
                 if (!nodes.contains(n) && n.getKey().charAt(0) != 'l') {
                     user.data().remove(n);
                 }

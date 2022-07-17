@@ -29,7 +29,7 @@ public class VyHub extends JavaPlugin {
 
     private LuckPerms luckPerms;
 
-    private static BukkitScheduler scheduler = Bukkit.getScheduler();
+    public static BukkitScheduler scheduler = Bukkit.getScheduler();
 
     private static int readyCheckTaskID;
     private static int playerTimeID;

@@ -1,31 +1,44 @@
 package net.vyhub.VyHubMinecraft.server;
 
 import com.google.gson.Gson;
-import net.vyhub.VyHubMinecraft.Entity.VyHubPlayer;
+import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
+import net.vyhub.VyHubMinecraft.VyHub;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class SvUser implements Listener {
 
-    public static Map<String, VyHubPlayer> vyHubPlayers = new HashMap<>();
+    public static Map<String, VyHubUser> vyHubPlayers = new HashMap<>();
+    private static Logger logger = Bukkit.getServer().getLogger();
 
     @EventHandler
     public static void checkUserExists(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        getUser(player.getUniqueId().toString());
+        VyHubUser user = getUser(player.getUniqueId().toString());
+
+        if (user == null) {
+            logger.warning(String.format("Could not register player %s, trying again in a minute..", player.getName()));
+
+            VyHub.scheduler.scheduleSyncDelayedTask(VyHub.getPlugin(VyHub.class), new Runnable(){
+                @Override
+                public void run(){
+                    checkUserExists(event);
+                }
+            }, 20L * 60L);
+        }
     }
 
-    public static VyHubPlayer getUser(String UUID) {
+    public static VyHubUser getUser(String UUID) {
         if (vyHubPlayers != null) {
             if (vyHubPlayers.containsKey(UUID)) {
                 return vyHubPlayers.get(UUID);
@@ -36,32 +49,41 @@ public class SvUser implements Listener {
 
         HttpResponse<String> response = Utility.sendRequest("/user/" + UUID + "?type=MINECRAFT", Types.GET);
 
-        if (response.statusCode() == 404) {
-            userInformation = createUser(UUID);
+        if (response != null) {
+            if (response.statusCode() == 404) {
+                userInformation = createUser(UUID);
+
+                if (userInformation == null) {
+                    return null;
+                }
+            } else if (response.statusCode() == 200) {
+                userInformation = response.body();
+            } else {
+                return null;
+            }
+
+            Gson gson = new Gson();
+            VyHubUser vyHubUser = gson.fromJson(userInformation, VyHubUser.class);
+
+            vyHubPlayers.put(UUID, vyHubUser);
+            return vyHubUser;
         } else {
-            userInformation = response.body();
+            return null;
         }
-
-        Gson gson = new Gson();
-        VyHubPlayer vyHubPlayer = gson.fromJson(userInformation, VyHubPlayer.class);
-
-        vyHubPlayers.put(UUID, vyHubPlayer);
-        return vyHubPlayer;
     }
 
     public static String createUser(String UUID) {
-        int statusCode = 500;
-        HttpResponse<String> response = null;
+        HashMap<String, Object> values = new HashMap<>() {{
+            put("type", "MINECRAFT");
+            put("identifier", UUID);
+        }};
 
-        while (statusCode != 200) {
-            HashMap<String, Object> values = new HashMap<>() {{
-                put("type", "MINECRAFT");
-                put("identifier", UUID);
-            }};
+        HttpResponse<String> response = Utility.sendRequestBody("/user/", Types.POST, Utility.createRequestBody(values));
 
-            response = Utility.sendRequestBody("/user/", Types.POST, Utility.createRequestBody(values));
-            statusCode = response.statusCode();
+        if (response != null && response.statusCode() == 200) {
+            return response.body();
         }
-        return response.body();
+
+        return null;
     }
 }

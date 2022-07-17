@@ -4,6 +4,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import net.vyhub.VyHubMinecraft.Entity.AppliedReward;
 import net.vyhub.VyHubMinecraft.Entity.Reward;
+import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
 import net.vyhub.VyHubMinecraft.VyHub;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
@@ -38,8 +39,11 @@ public class SvRewards implements Listener {
         StringBuilder stringBuilder = new StringBuilder();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            String userID = SvUser.getUser(player.getUniqueId().toString()).getId();
-            stringBuilder.append("user_id=").append(userID).append("&");
+            VyHubUser user = SvUser.getUser(player.getUniqueId().toString());
+
+            if (user != null) {
+                stringBuilder.append("user_id=").append(user.getId()).append("&");
+            }
         }
 
         if (stringBuilder.toString().length() != 0) {
@@ -49,27 +53,40 @@ public class SvRewards implements Listener {
         HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + Utility.serverbundleID + "&for_server_id=" + VyHub.checkConfig().get("serverId") + "&" +
                stringBuilder, Types.GET);
 
-        Gson gson = new Gson();
-        Type userRewardType = new TypeToken<Map<String, List<AppliedReward>>>() {}.getType();
+        if (resp != null && resp.statusCode() == 200) {
+            Gson gson = new Gson();
+            Type userRewardType = new TypeToken<Map<String, List<AppliedReward>>>() {}.getType();
 
-        rewards = gson.fromJson(resp.body(), userRewardType);
+            rewards = gson.fromJson(resp.body(), userRewardType);
+        }
     }
 
     public static void getPlayerReward(Player player) {
+        VyHubUser user = SvUser.getUser(player.getUniqueId().toString());
+
+        if (user == null) {
+            return;
+        }
+
         HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + Utility.serverbundleID + "&for_server_id=" + VyHub.checkConfig().get("serverId") +
                 "&user_id=" +
-                SvUser.getUser(player.getUniqueId().toString()).getId(), Types.GET);
+                user.getId(), Types.GET);
 
-        Gson gson = new Gson();
-        Type userRewardType = new TypeToken<Map<String, List<AppliedReward>>>() {}.getType();
+        if (resp != null && resp.statusCode() == 200) {
+            Gson gson = new Gson();
+            Type userRewardType = new TypeToken<Map<String, List<AppliedReward>>>() {}.getType();
 
-        Map<String, List<AppliedReward>> playerRewards = gson.fromJson(resp.body(), userRewardType);
-        rewards.put(player.getUniqueId().toString(), playerRewards.getOrDefault(player.getUniqueId().toString(), new ArrayList<>()));
+            Map<String, List<AppliedReward>> playerRewards = gson.fromJson(resp.body(), userRewardType);
+            rewards.put(player.getUniqueId().toString(), playerRewards.getOrDefault(player.getUniqueId().toString(), new ArrayList<>()));
+        }
     }
 
     public static void executeReward(List<String> events, String playerID) {
-        Map<String, List<AppliedReward>> rewardsByPlayer = new HashMap<>(rewards);
+        if (rewards == null) {
+            return;
+        }
 
+        Map<String, List<AppliedReward>> rewardsByPlayer = new HashMap<>(rewards);
 
         if (playerID == null) {
             for (String event : events) {
@@ -158,7 +175,7 @@ public class SvRewards implements Listener {
         for (Iterator<String> it = executedRewards.iterator(); it.hasNext();) {
             String rewardID = it.next();
             HttpResponse<String> response = Utility.sendRequestBody("/packet/reward/applied/" + rewardID, Types.PATCH, Utility.createRequestBody(values));
-            if (response.statusCode() == 200) {
+            if (response != null && response.statusCode() == 200) {
                 executedAndSentRewards.add(rewardID);
                 it.remove();
                 saveExecuted();

@@ -92,6 +92,8 @@ public class Utility {
         } catch (IOException | ParseException e) {
             Bukkit.getServer().getLogger().severe("ServerInformation doesn't exists");
             SvServer.getServerInformation();
+
+            return null;
         }
 
         JSONObject serverbundleObject = (JSONObject) jsonObj.get("serverbundle");

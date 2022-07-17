@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class VyHubPlayer {
+public class VyHubUser {
 
     private String id;
     private String type;
@@ -17,9 +17,9 @@ public class VyHubPlayer {
     private Map<String, String> attributes;
     private String email;
     private boolean email_notification;
-    private List<VyHubPlayer> linked_users;
+    private List<VyHubUser> linked_users;
 
-    public VyHubPlayer(String id, String type, String identifier, String registered_on, String username, String avatar, boolean admin, String credit_account_id, Map<String, String> attributes, String email, boolean email_notification, List<VyHubPlayer> linked_users) {
+    public VyHubUser(String id, String type, String identifier, String registered_on, String username, String avatar, boolean admin, String credit_account_id, Map<String, String> attributes, String email, boolean email_notification, List<VyHubUser> linked_users) {
         this.id = id;
         this.type = type;
         this.identifier = identifier;
@@ -122,11 +122,11 @@ public class VyHubPlayer {
         this.email_notification = email_notification;
     }
 
-    public List<VyHubPlayer> getLinked_users() {
+    public List<VyHubUser> getLinked_users() {
         return linked_users;
     }
 
-    public void setLinked_users(List<VyHubPlayer> linked_users) {
+    public void setLinked_users(List<VyHubUser> linked_users) {
         this.linked_users = linked_users;
     }
 
@@ -134,7 +134,7 @@ public class VyHubPlayer {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        VyHubPlayer that = (VyHubPlayer) o;
+        VyHubUser that = (VyHubUser) o;
         return identifier.equals(that.identifier);
     }
 
