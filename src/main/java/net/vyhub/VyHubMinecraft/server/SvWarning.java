@@ -51,7 +51,7 @@ public class SvWarning implements CommandExecutor {
             if (p != null) {
                 createWarning(p, args[1]);
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(),  String.format("msg %s You have received a warning", p.getName()));
-                SvBans.getVyHubBans();
+                SvBans.syncBans();
             }
 
             return false;

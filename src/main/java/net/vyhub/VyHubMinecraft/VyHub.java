@@ -59,10 +59,9 @@ public class VyHub extends JavaPlugin {
         listenerRegistration();
         commandRegistration();
         SvRewards.loadExecuted();
-        SvServer.getServerInformation();
 
         scheduler.runTaskTimer(plugin, SvServer::patchServer, 20L*1L, 20L*60L);
-        scheduler.runTaskTimer(plugin, SvBans::getMinecraftBans, 20L*1L, 20L*60L);
+        scheduler.runTaskTimer(plugin, SvBans::syncBans, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(plugin, SvStatistics::playerTime, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(plugin, SvRewards::getRewards, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(plugin, SvRewards::runDirectRewards, 20L*1L, 20L*60L);
@@ -141,6 +140,13 @@ public class VyHub extends JavaPlugin {
             playerTimeID = scheduler.runTaskTimer(plugin, SvStatistics::playerTime, 20L*1L, 20L*60L).getTaskId();
             commandRegistration();
             logger.warning("Cannot connect to VyHub API! Please follow the installation instructions.");
+            return;
+        }
+
+        Utility.getServerInformationObject();
+
+        if (Utility.serverbundleID == null || Utility.serverbundleID.isEmpty()) {
+            logger.warning("Cannot fetch serverbundle id from VyHub API! Please follow the installation instructions.");
             return;
         }
 
