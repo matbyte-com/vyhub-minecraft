@@ -109,9 +109,6 @@ public class SvBans implements CommandExecutor {
 
         // Check for bans missing on VyHub
         for (String playerID : bannedMinecraftPlayersDiff) {
-            logger.info(processedPlayers.toString());
-            logger.info(playerID);
-
             if (processedPlayers.contains(playerID)) {
                 // Unbanned on VyHub
                 logger.info(String.format("Unbanning minecraft ban for player %s. (Unbanned on VyHub)", playerID));
@@ -161,9 +158,9 @@ public class SvBans implements CommandExecutor {
 
         Bukkit.getBanList(BanList.Type.NAME).addBan(playerID, vyhubBan.getReason(), endDate, "VyHub");
 
-        Player bannnedPlayer = Bukkit.getPlayer(playerID);
+        Player bannnedPlayer = Bukkit.getPlayer(UUID.fromString(playerID));
         if (bannnedPlayer != null) {
-            bannnedPlayer.kickPlayer(vyhubBan.getReason());
+            bannnedPlayer.kickPlayer(String.format("You are banned from this server.\nReason: %s", vyhubBan.getReason()));
         }
 
         return true;
@@ -190,14 +187,18 @@ public class SvBans implements CommandExecutor {
 
         String vyHubAdminUserID = null;
         if (!minecraftBan.getSource().equals("CONSOLE") && !minecraftBan.getSource().equals("Server")) {
-            Player sourcePlayer = Bukkit.getPlayer(minecraftBan.getSource());
+            try{
+                Player sourcePlayer = Bukkit.getPlayer(UUID.fromString(minecraftBan.getSource()));
 
-            if (sourcePlayer != null) {
-                VyHubUser admin = SvUser.getUser(sourcePlayer.getUniqueId().toString());
+                if (sourcePlayer != null) {
+                    VyHubUser admin = SvUser.getUser(sourcePlayer.getUniqueId().toString());
 
-                if (admin != null) {
-                    vyHubAdminUserID = admin.getId();
+                    if (admin != null) {
+                        vyHubAdminUserID = admin.getId();
+                    }
                 }
+            } catch (IllegalArgumentException ignored){
+
             }
         }
 
@@ -222,7 +223,12 @@ public class SvBans implements CommandExecutor {
     }
 
     public static boolean unbanVyHubBan(String playerID) {
-        HttpResponse<String> response = Utility.sendRequest(String.format("/user/%s/ban?serverbundle_id=%s", playerID, Utility.serverbundleID), Types.PATCH);
+        VyHubUser user = SvUser.getUser(playerID);
+        if (user == null) {
+            return false;
+        }
+
+        HttpResponse<String> response = Utility.sendRequest(String.format("/user/%s/ban?serverbundle_id=%s", user.getId(), Utility.serverbundleID), Types.PATCH);
 
         return response != null && response.statusCode() == 200;
     }

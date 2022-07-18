@@ -33,7 +33,7 @@ public class Cache<T> {
         try {
             return Files.readString(Paths.get(filename), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return null;
         }
     }
 
