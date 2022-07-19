@@ -51,7 +51,7 @@ public class Utility {
 
             response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() < 200 || response.statusCode() > 299) {
+            if (response.statusCode() < 200 || response.statusCode() > 399) {
                 logger.severe(String.format("Error %d when accessing %s: %s", response.statusCode(), endpoint, response.body()));
             }
         } catch (IOException | InterruptedException e) {

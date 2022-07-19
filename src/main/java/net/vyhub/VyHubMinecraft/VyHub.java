@@ -68,6 +68,8 @@ public class VyHub extends JavaPlugin {
         scheduler.runTaskTimer(plugin, SvRewards::getRewards, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(plugin, SvRewards::runDirectRewards, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(plugin, SvStatistics::sendPlayerTime, 20L*1L, 20L*60L*30L);
+        scheduler.runTaskTimer(plugin, SvAdverts::loadAdverts, 20L*1L, 20L*60L*5L);
+        scheduler.runTaskTimer(plugin, SvAdverts::nextAdvert, 20L*5L, 20L*Integer.parseInt(VyHub.config.getOrDefault("advertInterval", "180")));
     }
 
 
@@ -99,6 +101,8 @@ public class VyHub extends JavaPlugin {
             config.put("apiURL","");
             config.put("apiKey","");
             config.put("serverID","");
+            config.put("advertPrefix","[★] ");
+            config.put("advertInterval","180");
 
             configCache.save(config);
         } else {
@@ -121,7 +125,7 @@ public class VyHub extends JavaPlugin {
 
         HttpResponse<String> response = Utility.sendRequest("/user/current", Types.GET);
 
-        if (response == null) {
+        if (response == null || (response.statusCode() != 200 &&  response.statusCode() != 307)) {
             playerTimeID = scheduler.runTaskTimer(plugin, SvStatistics::playerTime, 20L*1L, 20L*60L).getTaskId();
             commandRegistration();
             logger.warning("Cannot connect to VyHub API! Please follow the installation instructions.");

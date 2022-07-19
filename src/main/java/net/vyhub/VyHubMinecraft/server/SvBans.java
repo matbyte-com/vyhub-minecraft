@@ -90,6 +90,11 @@ public class SvBans implements CommandExecutor {
     public static void syncBans() {
         fetchMinecraftBans();
         fetchVyHubBans();
+
+        if (minecraftBans == null || vyhubBans == null) {
+            return;
+        }
+
         loadProcessedPlayers();
 
         Set<String> bannedMinecraftPlayers = minecraftBans.keySet();

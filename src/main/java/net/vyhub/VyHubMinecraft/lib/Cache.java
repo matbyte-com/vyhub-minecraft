@@ -1,6 +1,7 @@
 package net.vyhub.VyHubMinecraft.lib;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -18,7 +19,7 @@ public class Cache<T> {
     private String filename;
     private Type  type;
 
-    private Gson gson = new Gson();
+    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public Cache(String name, Type type) {
         this.filename = String.format("plugins/VyHub/%s.json", name);
