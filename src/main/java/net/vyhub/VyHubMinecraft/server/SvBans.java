@@ -58,6 +58,7 @@ public class SvBans implements CommandExecutor {
 
             minecraftBans = mcBansMap;
         } catch (IOException e) {
+            minecraftBans = null;
             throw new RuntimeException(e);
         }
     }
@@ -66,6 +67,7 @@ public class SvBans implements CommandExecutor {
         HttpResponse<String> response = Utility.sendRequest(String.format("/server/bundle/%s/ban?active=true", SvServer.serverbundleID), Types.GET);
 
         if (response == null || response.statusCode() != 200) {
+            vyhubBans = null;
             return;
         }
 
