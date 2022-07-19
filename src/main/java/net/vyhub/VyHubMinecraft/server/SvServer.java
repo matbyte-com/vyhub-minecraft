@@ -1,8 +1,11 @@
 package net.vyhub.VyHubMinecraft.server;
 
 
+import com.google.gson.Gson;
+import net.vyhub.VyHubMinecraft.Entity.VyHubServer;
 import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
 import net.vyhub.VyHubMinecraft.VyHub;
+import net.vyhub.VyHubMinecraft.lib.Cache;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
 import org.bukkit.Bukkit;
@@ -19,27 +22,37 @@ import java.util.Map;
 
 public class SvServer {
 
-    public static HttpResponse<String> getServerInformation() {
-        HttpResponse<String> response = Utility.sendRequest("/server/?type=MINECRAFT", Types.GET);
+    private static Cache<VyHubServer> serverCache = new Cache<>("server", VyHubServer.class);
+    public static String serverbundleID = null;
 
-        if (response == null || response.statusCode() != 200) {
-            new BukkitRunnable() {
-                public void run() {
-                   getServerInformation();
-                }
-            }.runTaskLater(VyHub.getPlugin(VyHub.class), 20L*60L);
+    private static Gson gson = new Gson();
+
+    public static VyHubServer getServerInformation() {
+        String serverID = VyHub.config.get("serverID");
+
+        if (serverID == null) {
             return null;
         }
 
+        HttpResponse<String> response = Utility.sendRequest(String.format("/server/%s", serverID), Types.GET);
 
-        try (FileWriter fileWr = new FileWriter("plugins/VyHub/serverInformation.json")) {
-            fileWr.write(response.body());
-            fileWr.flush();
+        VyHubServer server;
 
-        } catch (IOException e) {
-            Bukkit.getServer().getLogger().severe("VyHub API is not reachable");
+        if (response == null || response.statusCode() != 200) {
+            server = serverCache.load();
+        } else {
+            server = gson.fromJson(response.body(), VyHubServer.class);
         }
-        return response;
+
+        if (server == null) {
+            return null;
+        }
+
+        serverCache.save(server);
+
+        serverbundleID = server.getServerbundle_id();
+
+        return server;
     }
 
     public static void patchServer() {
@@ -61,8 +74,6 @@ public class SvServer {
             }
         }
 
-        Utility.getServerInformationObject();
-
         HashMap<String, Object> values = new HashMap<>() {{
             put("users_max", String.valueOf(Bukkit.getMaxPlayers()));
             put("users_current", String.valueOf(Bukkit.getOnlinePlayers().size()));
@@ -70,6 +81,6 @@ public class SvServer {
             put("is_alive", "true");
         }};
 
-        Utility.sendRequestBody("/server/" + VyHub.checkConfig().get("serverId"), Types.PATCH, Utility.createRequestBody(values));
+        Utility.sendRequestBody("/server/" + VyHub.config.get("serverID"), Types.PATCH, Utility.createRequestBody(values));
     }
 }

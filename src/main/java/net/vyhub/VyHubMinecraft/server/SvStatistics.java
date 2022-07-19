@@ -1,7 +1,9 @@
 package net.vyhub.VyHubMinecraft.server;
 
 
+import com.google.common.reflect.TypeToken;
 import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
+import net.vyhub.VyHubMinecraft.lib.Cache;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
 import org.bukkit.Bukkit;
@@ -15,8 +17,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SvStatistics {
-    public static HashMap<String, Double> playerTime = new HashMap<>();
+    public static Map<String, Double> playerTime = new HashMap<>();
     private static String definitionID;
+
+    private static Cache<Map<String, Double>> statisticCache = new Cache<>(
+            "statistics",
+            new TypeToken<HashMap<String, Double>>() {}.getType()
+    );
 
     public static String checkDefinition(){
         if (definitionID != null) {
@@ -83,7 +90,7 @@ public class SvStatistics {
                     HashMap<String, Object> values = new HashMap<>() {{
                         put("definition_id", definitionID);
                         put("user_id", user.getId());
-                        put("serverbundle_id", Utility.serverbundleID);
+                        put("serverbundle_id", SvServer.serverbundleID);
                         put("value", hours);
                     }};
 
@@ -92,6 +99,8 @@ public class SvStatistics {
                 }
             }
         }
+
+        statisticCache.save(playerTime);
     }
 
     public static void resetPlayerTime(String playerID) {
@@ -99,6 +108,11 @@ public class SvStatistics {
     }
 
     public static void playerTime() {
+        playerTime = statisticCache.load();
+        if (playerTime == null) {
+            playerTime = new HashMap<>();
+        }
+
         for (Player player: Bukkit.getOnlinePlayers()) {
             if (playerTime.containsKey(player.getUniqueId().toString())) {
                 double oldTime = playerTime.get(player.getUniqueId().toString());
@@ -107,5 +121,7 @@ public class SvStatistics {
                 playerTime.put(player.getUniqueId().toString(), 1.0);
             }
         }
+
+        statisticCache.save(playerTime);
     }
 }

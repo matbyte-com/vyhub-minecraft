@@ -1,18 +1,16 @@
 package net.vyhub.VyHubMinecraft;
 
-
+import com.google.common.reflect.TypeToken;
+import net.vyhub.VyHubMinecraft.lib.Cache;
 import net.vyhub.VyHubMinecraft.lib.PlayerGivenPermissionListener;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
 import net.vyhub.VyHubMinecraft.server.*;
 import net.luckperms.api.LuckPerms;
-import net.vyhub.VyHubMinecraft.server.*;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.*;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,9 +18,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.scheduler.BukkitScheduler;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 
 public class VyHub extends JavaPlugin {
@@ -34,11 +29,18 @@ public class VyHub extends JavaPlugin {
     private static int readyCheckTaskID;
     private static int playerTimeID;
 
+    public static Map<String, String> config = new HashMap<>();
+
+    private static Logger logger = Bukkit.getServer().getLogger();
+
+    private static Cache<Map<String, String>> configCache = new Cache<>(
+            "config",
+            new TypeToken<HashMap<String, String>>() {}.getType()
+    );
+
     @Override
     public void onEnable() {
         // Plugin startup logic
-        checkConfig();
-
         this.luckPerms = getServer().getServicesManager().load(LuckPerms.class);
         new PlayerGivenPermissionListener(this, this.luckPerms).register();
 
@@ -65,7 +67,7 @@ public class VyHub extends JavaPlugin {
         scheduler.runTaskTimer(plugin, SvStatistics::playerTime, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(plugin, SvRewards::getRewards, 20L*1L, 20L*60L);
         scheduler.runTaskTimer(plugin, SvRewards::runDirectRewards, 20L*1L, 20L*60L);
-        scheduler.runTaskTimer(plugin, SvStatistics::sendPlayerTime, 20L*1L, 20L*60L*60L);
+        scheduler.runTaskTimer(plugin, SvStatistics::sendPlayerTime, 20L*1L, 20L*60L*30L);
     }
 
 
@@ -87,49 +89,32 @@ public class VyHub extends JavaPlugin {
     }
 
 
-    public static Map<String, String> checkConfig() {
-        JSONParser jsonParser = new JSONParser();
-        Map<String, String> configMap = new HashMap<>();
+    public static Map<String, String> loadConfig() {
+        Map<String, String> configMap = configCache.load();
 
-        try (FileReader reader = new FileReader("plugins/VyHub/config.json"))
-        {
-            JSONObject jsonObj = (JSONObject) jsonParser.parse(reader);
+        if (configMap == null) {
+            logger.log(Level.WARNING, "Config File does not exist. Please update config.json File");
 
-            configMap.put("apiUrl", (String) jsonObj.get("API-URL"));
-            configMap.put("apiKey", (String) jsonObj.get("API-Key"));
-            configMap.put("serverId", (String) jsonObj.get("Server-ID"));
+            config = new HashMap<>();
+            config.put("apiURL","");
+            config.put("apiKey","");
+            config.put("serverID","");
 
-        } catch (FileNotFoundException e) {
-            Bukkit.getServer().getLogger().log(Level.WARNING, "Config File does not exist. Please update config.json File");
-            createJsonFile();
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
+            configCache.save(config);
+        } else {
+            config = configMap;
         }
-        return configMap;
-    }
 
-    private static void createJsonFile() {;
-        JSONObject configDetails = new JSONObject();
-        configDetails.put("API-URL","");
-        configDetails.put("API-Key","");
-        configDetails.put("Server-ID","");
-
-        getPlugin(VyHub.class).getDataFolder().mkdir();
-        try (FileWriter fileWr = new FileWriter("plugins/VyHub/config.json")) {
-            fileWr.write(configDetails.toJSONString());
-            fileWr.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return config;
     }
 
     public static void checkReady() {
         JavaPlugin plugin = getPlugin(VyHub.class);
         Logger logger = plugin.getLogger();
 
-        Map<String, String> config = checkConfig();
+        Map<String, String> config = loadConfig();
 
-        if (config.get("apiUrl").isEmpty() || config.get("apiKey").isEmpty() || config.get("serverId").isEmpty()) {
+        if (config.get("apiURL").isEmpty() || config.get("apiKey").isEmpty() || config.get("serverID").isEmpty()) {
             logger.warning("VyHub config is missing values! Please follow the installation instructions.");
             return;
         }
@@ -143,9 +128,9 @@ public class VyHub extends JavaPlugin {
             return;
         }
 
-        Utility.getServerInformationObject();
+        SvServer.getServerInformation();
 
-        if (Utility.serverbundleID == null || Utility.serverbundleID.isEmpty()) {
+        if (SvServer.serverbundleID == null || SvServer.serverbundleID.isEmpty()) {
             logger.warning("Cannot fetch serverbundle id from VyHub API! Please follow the installation instructions.");
             return;
         }

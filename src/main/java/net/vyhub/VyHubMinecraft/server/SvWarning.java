@@ -20,7 +20,7 @@ public class SvWarning implements CommandExecutor {
         String finalVyHubPlayerUUID = vyHubPlayerUUID;
         HashMap<String, Object> values = new HashMap<>() {{
             put("reason", reason);
-            put("serverbundle_id", Utility.serverbundleID);
+            put("serverbundle_id", SvServer.serverbundleID);
             put("user_id", finalVyHubPlayerUUID);
         }};
 

@@ -2,7 +2,6 @@ package net.vyhub.VyHubMinecraft.server;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.internal.LinkedTreeMap;
 import net.vyhub.VyHubMinecraft.Entity.MinecraftBan;
 import net.vyhub.VyHubMinecraft.Entity.VyHubBan;
 import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
@@ -42,8 +41,7 @@ public class SvBans implements CommandExecutor {
 
     private static Cache<Set<String>> banCache = new Cache<>(
             "banned_players",
-            new TypeToken<HashSet<String>>() {
-            }.getType()
+            new TypeToken<HashSet<String>>() {}.getType()
     );
 
     public static void fetchMinecraftBans() {
@@ -65,7 +63,7 @@ public class SvBans implements CommandExecutor {
     }
 
     public static void fetchVyHubBans() {
-        HttpResponse<String> response = Utility.sendRequest(String.format("/server/bundle/%s/ban?active=true", Utility.serverbundleID), Types.GET);
+        HttpResponse<String> response = Utility.sendRequest(String.format("/server/bundle/%s/ban?active=true", SvServer.serverbundleID), Types.GET);
 
         if (response == null || response.statusCode() != 200) {
             return;
@@ -206,7 +204,7 @@ public class SvBans implements CommandExecutor {
         HashMap<String, Object> values = new HashMap<>() {{
             put("length", finalTime);
             put("reason", minecraftBan.getReason());
-            put("serverbundle_id", Utility.serverbundleID);
+            put("serverbundle_id", SvServer.serverbundleID);
             put("user_id", user.getId());
             put("created_on", createdDate.format(isoDateFormatter));
         }};
@@ -228,7 +226,7 @@ public class SvBans implements CommandExecutor {
             return false;
         }
 
-        HttpResponse<String> response = Utility.sendRequest(String.format("/user/%s/ban?serverbundle_id=%s", user.getId(), Utility.serverbundleID), Types.PATCH);
+        HttpResponse<String> response = Utility.sendRequest(String.format("/user/%s/ban?serverbundle_id=%s", user.getId(), SvServer.serverbundleID), Types.PATCH);
 
         return response != null && response.statusCode() == 200;
     }
@@ -244,8 +242,23 @@ public class SvBans implements CommandExecutor {
             //args[0] = Player, args[1] = time, args[2] =reason
             Player p = Bukkit.getPlayer(args[0]);
             if (p != null) {
-                p.kickPlayer(args[2]);
-                Bukkit.getBanList(BanList.Type.NAME).addBan(p.getUniqueId().toString(), args[2], new Date(Calendar.getInstance().getTimeInMillis() + (Long.parseLong(args[1]) * 60 * 1000)), sender.getName());
+                long minutes;
+
+                try {
+                    minutes = Long.parseLong(args[1]);
+
+                    if (minutes < 1) {
+                        throw new NumberFormatException();
+                    }
+                } catch (NumberFormatException nfe) {
+                    Utility.sendUsage(sender, "Invalid number of minutes.");
+                    return false;
+                }
+
+                p.kickPlayer(String.format("You are banned from this server for %d minutes.\nReason: %s", minutes, args[2]));
+                Bukkit.getBanList(BanList.Type.NAME).addBan(p.getUniqueId().toString(), args[2], new Date(Calendar.getInstance().getTimeInMillis() + (minutes * 60 * 1000)), sender.getName());
+            } else {
+                Utility.sendUsage(sender, "Player must be online.");
             }
             return false;
         }

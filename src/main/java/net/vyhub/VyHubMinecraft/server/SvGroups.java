@@ -37,7 +37,7 @@ public class SvGroups implements Listener {
             return;
         }
 
-        HttpResponse<String> response = Utility.sendRequest("/user/" + user.getId() + "/group?serverbundle_id=" + Utility.serverbundleID,
+        HttpResponse<String> response = Utility.sendRequest("/user/" + user.getId() + "/group?serverbundle_id=" + SvServer.serverbundleID,
                 Types.GET);
 
         if (response == null  || response.statusCode() != 200) {

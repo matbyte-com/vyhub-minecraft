@@ -6,6 +6,7 @@ import net.vyhub.VyHubMinecraft.Entity.AppliedReward;
 import net.vyhub.VyHubMinecraft.Entity.Reward;
 import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
 import net.vyhub.VyHubMinecraft.VyHub;
+import net.vyhub.VyHubMinecraft.lib.Cache;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
 import org.bukkit.Bukkit;
@@ -18,21 +19,21 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.io.*;
 import java.lang.reflect.Type;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class SvRewards implements Listener {
 
     private static Map<String, List<AppliedReward>> rewards;
     private static List<String> executedRewards = new ArrayList<>();
     private static List<String> executedAndSentRewards = new ArrayList<>();
+
+    private static Cache<List<String>> rewardCache = new Cache<>(
+            "executed_rewards",
+            new TypeToken<ArrayList<String>>() {}.getType()
+    );
 
 
     public static void getRewards() {
@@ -50,7 +51,7 @@ public class SvRewards implements Listener {
             stringBuilder.deleteCharAt(stringBuilder.length() - 1);
         }
 
-        HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + Utility.serverbundleID + "&for_server_id=" + VyHub.checkConfig().get("serverId") + "&" +
+        HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + SvServer.serverbundleID + "&for_server_id=" + VyHub.config.get("serverID") + "&" +
                stringBuilder, Types.GET);
 
         if (resp != null && resp.statusCode() == 200) {
@@ -68,7 +69,7 @@ public class SvRewards implements Listener {
             return;
         }
 
-        HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + Utility.serverbundleID + "&for_server_id=" + VyHub.checkConfig().get("serverId") +
+        HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + SvServer.serverbundleID + "&for_server_id=" + VyHub.config.get("serverID") +
                 "&user_id=" +
                 user.getId(), Types.GET);
 
@@ -151,17 +152,12 @@ public class SvRewards implements Listener {
     }
 
     public static void saveExecuted() {
-        try (FileWriter fileWr = new FileWriter("plugins/VyHub/rewardsQueue.txt")) {
-            fileWr.write(executedRewards.stream().collect(Collectors.joining("\n")));
-            fileWr.flush();
-        } catch (IOException e) {
-            Bukkit.getServer().getLogger().warning("VyHub API is not reachable");
-        }
+        rewardCache.save(executedRewards);
     }
 
     public static void sendExecuted() {
         List<String> serverID = new ArrayList<>();
-        serverID.add(VyHub.checkConfig().get("serverId"));
+        serverID.add(VyHub.config.get("serverID"));
         executedAndSentRewards = new ArrayList<>();
         HashMap<String, Object> values = new HashMap<>() {{
             put("executed_on", serverID);
@@ -174,27 +170,15 @@ public class SvRewards implements Listener {
                 it.remove();
                 saveExecuted();
             }
-
         }
     }
 
     public static void loadExecuted() {
-        File file = new File("plugins/VyHub/rewardsQueue.txt");
+        executedRewards = rewardCache.load();
 
-        if (!file.isFile()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        if (executedRewards == null) {
+            executedRewards = new ArrayList<>();
         }
-
-       try (Stream<String> lines = Files.lines(Paths.get("plugins/VyHub/rewardsQueue.txt"))) {
-           executedRewards = lines.collect(Collectors.toList());
-       } catch (IOException e) {
-           throw new RuntimeException(e);
-       }
-
     }
 
     public static void runDirectRewards() {
