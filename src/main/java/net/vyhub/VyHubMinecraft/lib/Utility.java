@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -39,6 +40,7 @@ public class Utility {
                 .uri(URI.create(VyHub.config.get("apiURL") + endpoint))
                 .setHeader("Authorization", "Bearer " + VyHub.config.get("apiKey"))
                 .method(type.name(), (body != null ? HttpRequest.BodyPublishers.ofString(body) : HttpRequest.BodyPublishers.noBody()))
+                .timeout(Duration.ofSeconds(2))
                 .build();
 
         HttpResponse<String> response = null;

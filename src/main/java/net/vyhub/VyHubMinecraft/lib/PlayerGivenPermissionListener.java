@@ -1,19 +1,17 @@
 package net.vyhub.VyHubMinecraft.lib;
 
 
-import net.vyhub.VyHubMinecraft.VyHub;
-
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.event.EventBus;
 import net.luckperms.api.event.node.NodeAddEvent;
 import net.luckperms.api.event.node.NodeRemoveEvent;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;
-
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.PermissionNode;
 import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.SuffixNode;
+import net.vyhub.VyHubMinecraft.VyHub;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 

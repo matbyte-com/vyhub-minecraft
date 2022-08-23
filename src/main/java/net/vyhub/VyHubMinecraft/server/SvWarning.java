@@ -35,9 +35,9 @@ public class SvWarning implements CommandExecutor {
         if (response == null || response.statusCode() != 200) {
             adminPlayer.sendMessage("§c[WARN] §9Error while warning player. Please try again later.");
         } else {
-            player.sendMessage(String.format("§c[WARN] §9You have received a warning: %s", reason));
+            player.sendMessage(String.format("§c[WARN] §9You have received a warning:§6 %s", reason));
             player.sendMessage("§c[WARN] §9Too many warnings will result in a ban.");
-            adminPlayer.sendMessage(String.format("§c[WARN] §9Warned user %s: %s", player.getName(), reason));
+            adminPlayer.sendMessage(String.format("§c[WARN] §9Warned user %s:§6 %s", player.getName(), reason));
         }
 
     }
@@ -55,8 +55,13 @@ public class SvWarning implements CommandExecutor {
             Player p = Bukkit.getPlayer(args[0]);
 
             if (p != null) {
-                createWarning(p, args[1], player);
-                SvBans.syncBans();
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        createWarning(p, args[1], player);
+                        SvBans.syncBans();
+                    }
+                }.runTaskAsynchronously(VyHub.plugin);
             }
 
             return false;

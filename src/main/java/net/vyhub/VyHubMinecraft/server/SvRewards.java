@@ -6,6 +6,7 @@ import net.vyhub.VyHubMinecraft.Entity.AppliedReward;
 import net.vyhub.VyHubMinecraft.Entity.Reward;
 import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
 import net.vyhub.VyHubMinecraft.VyHub;
+import net.vyhub.VyHubMinecraft.event.VyHubPlayerInitializedEvent;
 import net.vyhub.VyHubMinecraft.lib.Cache;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
@@ -14,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -32,7 +32,8 @@ public class SvRewards implements Listener {
 
     private static Cache<List<String>> rewardCache = new Cache<>(
             "executed_rewards",
-            new TypeToken<ArrayList<String>>() {}.getType()
+            new TypeToken<ArrayList<String>>() {
+            }.getType()
     );
 
 
@@ -52,11 +53,12 @@ public class SvRewards implements Listener {
         }
 
         HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + SvServer.serverbundleID + "&for_server_id=" + VyHub.config.get("serverID") + "&" +
-               stringBuilder, Types.GET);
+                stringBuilder, Types.GET);
 
         if (resp != null && resp.statusCode() == 200) {
             Gson gson = new Gson();
-            Type userRewardType = new TypeToken<Map<String, List<AppliedReward>>>() {}.getType();
+            Type userRewardType = new TypeToken<Map<String, List<AppliedReward>>>() {
+            }.getType();
 
             rewards = gson.fromJson(resp.body(), userRewardType);
         }
@@ -69,20 +71,25 @@ public class SvRewards implements Listener {
             return;
         }
 
+        if (rewards == null) {
+            rewards = new HashMap<>();
+        }
+
         HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + SvServer.serverbundleID + "&for_server_id=" + VyHub.config.get("serverID") +
                 "&user_id=" +
                 user.getId(), Types.GET);
 
         if (resp != null && resp.statusCode() == 200) {
             Gson gson = new Gson();
-            Type userRewardType = new TypeToken<Map<String, List<AppliedReward>>>() {}.getType();
+            Type userRewardType = new TypeToken<Map<String, List<AppliedReward>>>() {
+            }.getType();
 
             Map<String, List<AppliedReward>> playerRewards = gson.fromJson(resp.body(), userRewardType);
             rewards.put(player.getUniqueId().toString(), playerRewards.getOrDefault(player.getUniqueId().toString(), new ArrayList<>()));
         }
     }
 
-    public static void executeReward(List<String> events, String playerID) {
+    public static synchronized void executeReward(List<String> events, String playerID) {
         if (rewards == null) {
             return;
         }
@@ -116,7 +123,7 @@ public class SvRewards implements Listener {
             }
 
             for (AppliedReward appliedReward : appliedRewards) {
-                if (executedRewards.contains(appliedReward.getId()) || executedAndSentRewards.contains(appliedReward.getId())){
+                if (executedRewards.contains(appliedReward.getId()) || executedAndSentRewards.contains(appliedReward.getId())) {
                     continue;
                 }
 
@@ -130,50 +137,55 @@ public class SvRewards implements Listener {
                     } else {
                         success = false;
 
-                        Bukkit.getServer().getLogger().log(Level.WARNING ,"No implementation for Reward Type: " + reward.getType());
+                        Bukkit.getServer().getLogger().log(Level.WARNING, "No implementation for Reward Type: " + reward.getType());
                     }
                     if (reward.getOnce()) {
                         setExecuted(appliedReward.getId());
                     }
-                    if (success)
-                    {
-                        Bukkit.getServer().getLogger().log(Level.INFO ,"RewardName: " + appliedReward.getReward().getName() + " Type: " +
-                            appliedReward.getReward().getType() + " Player: " + player.getName() + " executed!");
+                    if (success) {
+                        Bukkit.getServer().getLogger().log(Level.INFO, "RewardName: " + appliedReward.getReward().getName() + " Type: " +
+                                appliedReward.getReward().getType() + " Player: " + player.getName() + " executed!");
                     }
                 }
             }
         }
-        sendExecuted();
+
+        Bukkit.getScheduler().runTaskAsynchronously(VyHub.getPlugin(VyHub.class), SvRewards::sendExecuted);
     }
 
-    public static void setExecuted(String id) {
+    public static synchronized void setExecuted(String id) {
         executedRewards.add(id);
         saveExecuted();
     }
 
-    public static void saveExecuted() {
+    public static synchronized void saveExecuted() {
         rewardCache.save(executedRewards);
     }
 
-    public static void sendExecuted() {
+    public static synchronized void sendExecuted() {
         List<String> serverID = new ArrayList<>();
         serverID.add(VyHub.config.get("serverID"));
-        executedAndSentRewards = new ArrayList<>();
+
+        List<String> newExecutedAndSentRewards = new ArrayList<>();
         HashMap<String, Object> values = new HashMap<>() {{
             put("executed_on", serverID);
         }};
-        for (Iterator<String> it = executedRewards.iterator(); it.hasNext();) {
+
+        for (Iterator<String> it = executedRewards.iterator(); it.hasNext(); ) {
             String rewardID = it.next();
             HttpResponse<String> response = Utility.sendRequestBody("/packet/reward/applied/" + rewardID, Types.PATCH, Utility.createRequestBody(values));
+
             if (response != null && response.statusCode() == 200) {
-                executedAndSentRewards.add(rewardID);
+                newExecutedAndSentRewards.add(rewardID);
                 it.remove();
                 saveExecuted();
             }
         }
+
+        executedAndSentRewards = newExecutedAndSentRewards;
     }
 
-    public static void loadExecuted() {
+    public static synchronized void loadExecuted() {
         executedRewards = rewardCache.load();
 
         if (executedRewards == null) {
@@ -191,15 +203,25 @@ public class SvRewards implements Listener {
 
 
     @EventHandler
-    public void onLogin(PlayerJoinEvent event) {
+    public void onPlayerInit(VyHubPlayerInitializedEvent event) {
         Player player = event.getPlayer();
-        getPlayerReward(player);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                getPlayerReward(player);
 
-        List<String> eventList = new LinkedList<>();
-        eventList.add("CONNECT");
-        eventList.add("SPAWN");
+                List<String> eventList = new LinkedList<>();
+                eventList.add("CONNECT");
+                eventList.add("SPAWN");
 
-        executeReward(eventList, player.getUniqueId().toString());
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        executeReward(eventList, player.getUniqueId().toString());
+                    }
+                }.runTask(VyHub.plugin);
+            }
+        }.runTaskAsynchronously(VyHub.plugin);
     }
 
     @EventHandler

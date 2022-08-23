@@ -22,10 +22,11 @@ public class SvStatistics {
 
     private static Cache<Map<String, Double>> statisticCache = new Cache<>(
             "statistics",
-            new TypeToken<HashMap<String, Double>>() {}.getType()
+            new TypeToken<HashMap<String, Double>>() {
+            }.getType()
     );
 
-    public static String checkDefinition(){
+    public static String checkDefinition() {
         if (definitionID != null) {
             return definitionID;
         }
@@ -41,7 +42,7 @@ public class SvStatistics {
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
-                definitionID =  object.get("id").toString();
+                definitionID = object.get("id").toString();
                 return definitionID;
             } else if (response.statusCode() == 404) {
                 HashMap<String, Object> values = new HashMap<>() {{
@@ -63,7 +64,7 @@ public class SvStatistics {
                     } catch (ParseException e) {
                         throw new RuntimeException(e);
                     }
-                    definitionID =  object.get("id").toString();
+                    definitionID = object.get("id").toString();
                     return definitionID;
                 }
             }
@@ -83,7 +84,7 @@ public class SvStatistics {
                 if (user != null) {
                     double hours = Math.round((entry.getValue() / 60) * 100.0) / 100.0;
 
-                    if (hours < 0.1 ) {
+                    if (hours < 0.1) {
                         continue;
                     }
 
@@ -113,7 +114,7 @@ public class SvStatistics {
             playerTime = new HashMap<>();
         }
 
-        for (Player player: Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (playerTime.containsKey(player.getUniqueId().toString())) {
                 double oldTime = playerTime.get(player.getUniqueId().toString());
                 playerTime.replace(player.getUniqueId().toString(), oldTime + 1);

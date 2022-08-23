@@ -3,6 +3,7 @@ package net.vyhub.VyHubMinecraft.server;
 import com.google.gson.Gson;
 import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
 import net.vyhub.VyHubMinecraft.VyHub;
+import net.vyhub.VyHubMinecraft.event.VyHubPlayerInitializedEvent;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
 import org.bukkit.Bukkit;
@@ -10,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.net.http.HttpResponse;
 import java.util.HashMap;
@@ -22,19 +24,35 @@ public class SvUser implements Listener {
     private static Logger logger = Bukkit.getServer().getLogger();
 
     @EventHandler
-    public static void checkUserExists(PlayerJoinEvent event) {
+    public static void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                checkPlayerExists(player);
+            }
+        }.runTaskAsynchronously(VyHub.plugin);
+    }
+
+    public static void checkPlayerExists(Player player) {
         VyHubUser user = getUser(player.getUniqueId().toString());
 
         if (user == null) {
             logger.warning(String.format("Could not register player %s, trying again in a minute..", player.getName()));
 
-            VyHub.scheduler.scheduleSyncDelayedTask(VyHub.getPlugin(VyHub.class), new Runnable(){
+            new BukkitRunnable() {
                 @Override
-                public void run(){
-                    checkUserExists(event);
+                public void run() {
+                    checkPlayerExists(player);
                 }
-            }, 20L * 60L);
+            }.runTaskLaterAsynchronously(VyHub.plugin, 20L * 60L);
+        } else {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    Bukkit.getPluginManager().callEvent(new VyHubPlayerInitializedEvent(player));
+                }
+            }.runTask(VyHub.plugin);
         }
     }
 

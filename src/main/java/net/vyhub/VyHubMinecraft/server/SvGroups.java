@@ -1,20 +1,22 @@
 package net.vyhub.VyHubMinecraft.server;
 
-import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
-import net.vyhub.VyHubMinecraft.lib.Types;
-import net.vyhub.VyHubMinecraft.lib.Utility;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.data.DataMutateResult;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
+import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
+import net.vyhub.VyHubMinecraft.VyHub;
+import net.vyhub.VyHubMinecraft.event.VyHubPlayerInitializedEvent;
+import net.vyhub.VyHubMinecraft.lib.Types;
+import net.vyhub.VyHubMinecraft.lib.Utility;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -28,8 +30,17 @@ import java.util.List;
 public class SvGroups implements Listener {
 
     @EventHandler
-    public static void syncGroups(PlayerJoinEvent event) {
+    public static void onPlayerInit(VyHubPlayerInitializedEvent event) {
         Player player = event.getPlayer();
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                syncGroups(player);
+            }
+        }.runTaskAsynchronously(VyHub.plugin);
+    }
+
+    public static void syncGroups(Player player) {
         JSONParser jsonParser = new JSONParser();
         VyHubUser user = SvUser.getUser(player.getUniqueId().toString());
 
@@ -40,7 +51,7 @@ public class SvGroups implements Listener {
         HttpResponse<String> response = Utility.sendRequest("/user/" + user.getId() + "/group?serverbundle_id=" + SvServer.serverbundleID,
                 Types.GET);
 
-        if (response == null  || response.statusCode() != 200) {
+        if (response == null || response.statusCode() != 200) {
             return;
         }
 
@@ -59,8 +70,13 @@ public class SvGroups implements Listener {
                 }
             }
 
-            addUserToGroup(allGroups, player);
 
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    addUserToGroup(allGroups, player);
+                }
+            }.runTask(VyHub.plugin);
         } catch (ParseException e) {
             e.printStackTrace();
         }

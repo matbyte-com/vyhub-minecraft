@@ -41,18 +41,20 @@ public class SvBans implements CommandExecutor {
 
     private static Cache<Set<String>> banCache = new Cache<>(
             "banned_players",
-            new TypeToken<HashSet<String>>() {}.getType()
+            new TypeToken<HashSet<String>>() {
+            }.getType()
     );
 
     public static void fetchMinecraftBans() {
         try {
             String bansJson = Files.readString(Paths.get("banned-players.json"), StandardCharsets.UTF_8);
 
-            Type minecraftBansType = new TypeToken<List<MinecraftBan>>() {}.getType();
+            Type minecraftBansType = new TypeToken<List<MinecraftBan>>() {
+            }.getType();
             List<MinecraftBan> mcBansList = gson.fromJson(bansJson, minecraftBansType);
             Map<String, MinecraftBan> mcBansMap = new HashMap<>();
 
-            for(MinecraftBan mcBan : mcBansList) {
+            for (MinecraftBan mcBan : mcBansList) {
                 mcBansMap.put(mcBan.getUuid(), mcBan);
             }
 
@@ -89,7 +91,7 @@ public class SvBans implements CommandExecutor {
         banCache.save(processedPlayers);
     }
 
-    public static void syncBans() {
+    public static synchronized void syncBans() {
         fetchMinecraftBans();
         fetchVyHubBans();
 
@@ -97,18 +99,27 @@ public class SvBans implements CommandExecutor {
             return;
         }
 
+        compareAndHandleDiffs();
+
+        //Bukkit.getScheduler().runTask(VyHub.plugin, SvBans::);
+    }
+
+    private static synchronized void compareAndHandleDiffs() {
         loadProcessedPlayers();
 
         Set<String> bannedMinecraftPlayers = minecraftBans.keySet();
 
         Set<String> bannedVyHubPlayers = vyhubBans.keySet();
 
+        // All minecraft bans, that do not exist on VyHub
         Set<String> bannedMinecraftPlayersDiff = new HashSet<>(bannedMinecraftPlayers);
         bannedMinecraftPlayersDiff.removeAll(bannedVyHubPlayers);
 
+        // All VyHub bans, that do not exist on minecraft server
         Set<String> bannedVyHubPlayersDiff = new HashSet<>(bannedVyHubPlayers);
         bannedVyHubPlayersDiff.removeAll(bannedMinecraftPlayers);
 
+        // All bans that minecraft server and VyHub have in common
         Set<String> bannedPlayersIntersect = new HashSet<>(bannedVyHubPlayers);
         bannedPlayersIntersect.retainAll(bannedMinecraftPlayers);
 
@@ -192,7 +203,7 @@ public class SvBans implements CommandExecutor {
 
         String vyHubAdminUserID = null;
         if (!minecraftBan.getSource().equals("CONSOLE") && !minecraftBan.getSource().equals("Server")) {
-            try{
+            try {
                 Player sourcePlayer = Bukkit.getPlayer(UUID.fromString(minecraftBan.getSource()));
 
                 if (sourcePlayer != null) {
@@ -202,7 +213,7 @@ public class SvBans implements CommandExecutor {
                         vyHubAdminUserID = admin.getId();
                     }
                 }
-            } catch (IllegalArgumentException ignored){
+            } catch (IllegalArgumentException ignored) {
 
             }
         }

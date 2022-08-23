@@ -1,23 +1,22 @@
 package net.vyhub.VyHubMinecraft;
 
 import com.google.common.reflect.TypeToken;
+import net.luckperms.api.LuckPerms;
 import net.vyhub.VyHubMinecraft.lib.Cache;
 import net.vyhub.VyHubMinecraft.lib.PlayerGivenPermissionListener;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
 import net.vyhub.VyHubMinecraft.server.*;
-import net.luckperms.api.LuckPerms;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.bukkit.scheduler.BukkitScheduler;
 
 
 public class VyHub extends JavaPlugin {
@@ -35,16 +34,21 @@ public class VyHub extends JavaPlugin {
 
     private static Cache<Map<String, String>> configCache = new Cache<>(
             "config",
-            new TypeToken<HashMap<String, String>>() {}.getType()
+            new TypeToken<HashMap<String, String>>() {
+            }.getType()
     );
+
+    public static JavaPlugin plugin;
 
     @Override
     public void onEnable() {
+        plugin = this;
+
         // Plugin startup logic
         this.luckPerms = getServer().getServicesManager().load(LuckPerms.class);
         new PlayerGivenPermissionListener(this, this.luckPerms).register();
 
-        readyCheckTaskID = scheduler.runTaskTimer(this, VyHub::checkReady, 0, 20L*60L).getTaskId();
+        readyCheckTaskID = scheduler.runTaskTimer(this, VyHub::checkReady, 0, 20L * 60L).getTaskId();
     }
 
     @Override
@@ -53,8 +57,6 @@ public class VyHub extends JavaPlugin {
     }
 
     public static void onReady() {
-        JavaPlugin plugin = getPlugin(VyHub.class);
-
         scheduler.cancelTask(readyCheckTaskID);
         scheduler.cancelTask(playerTimeID);
 
@@ -62,20 +64,18 @@ public class VyHub extends JavaPlugin {
         commandRegistration();
         SvRewards.loadExecuted();
 
-        scheduler.runTaskTimer(plugin, SvServer::patchServer, 20L*1L, 20L*60L);
-        scheduler.runTaskTimer(plugin, SvBans::syncBans, 20L*1L, 20L*60L);
-        scheduler.runTaskTimer(plugin, SvStatistics::playerTime, 20L*1L, 20L*60L);
-        scheduler.runTaskTimer(plugin, SvRewards::getRewards, 20L*1L, 20L*60L);
-        scheduler.runTaskTimer(plugin, SvRewards::runDirectRewards, 20L*1L, 20L*60L);
-        scheduler.runTaskTimer(plugin, SvStatistics::sendPlayerTime, 20L*1L, 20L*60L*30L);
-        scheduler.runTaskTimer(plugin, SvAdverts::loadAdverts, 20L*1L, 20L*60L*5L);
-        scheduler.runTaskTimer(plugin, SvAdverts::nextAdvert, 20L*5L, 20L*Integer.parseInt(VyHub.config.getOrDefault("advertInterval", "180")));
+        scheduler.runTaskTimerAsynchronously(plugin, SvServer::patchServer, 20L * 1L, 20L * 60L);
+        scheduler.runTaskTimerAsynchronously(plugin, SvBans::syncBans, 20L * 1L, 20L * 60L);
+        scheduler.runTaskTimerAsynchronously(plugin, SvStatistics::playerTime, 20L * 1L, 20L * 60L);
+        scheduler.runTaskTimerAsynchronously(plugin, SvRewards::getRewards, 20L * 5L, 20L * 60L);
+        scheduler.runTaskTimer(plugin, SvRewards::runDirectRewards, 20L * 1L, 20L * 60L);
+        scheduler.runTaskTimerAsynchronously(plugin, SvStatistics::sendPlayerTime, 20L * 5L, 20L * 60L * 30L);
+        scheduler.runTaskTimerAsynchronously(plugin, SvAdverts::loadAdverts, 20L * 1L, 20L * 60L * 5L);
+        scheduler.runTaskTimerAsynchronously(plugin, SvAdverts::nextAdvert, 20L * 5L, 20L * Integer.parseInt(VyHub.config.getOrDefault("advertInterval", "180")));
     }
 
 
     private static void listenerRegistration() {
-        JavaPlugin plugin = getPlugin(VyHub.class);
-
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new SvUser(), plugin);
         pluginManager.registerEvents(new SvGroups(), plugin);
@@ -83,8 +83,6 @@ public class VyHub extends JavaPlugin {
     }
 
     private static void commandRegistration() {
-        JavaPlugin plugin = getPlugin(VyHub.class);
-
         plugin.getCommand("login").setExecutor(new SvLogin());
         plugin.getCommand("timeban").setExecutor(new SvBans());
         plugin.getCommand("warn").setExecutor(new SvWarning());
@@ -98,11 +96,11 @@ public class VyHub extends JavaPlugin {
             logger.log(Level.WARNING, "Config File does not exist. Please update config.json File");
 
             config = new HashMap<>();
-            config.put("apiURL","");
-            config.put("apiKey","");
-            config.put("serverID","");
-            config.put("advertPrefix","[★] ");
-            config.put("advertInterval","180");
+            config.put("apiURL", "");
+            config.put("apiKey", "");
+            config.put("serverID", "");
+            config.put("advertPrefix", "[★] ");
+            config.put("advertInterval", "180");
 
             configCache.save(config);
         } else {
@@ -113,7 +111,6 @@ public class VyHub extends JavaPlugin {
     }
 
     public static void checkReady() {
-        JavaPlugin plugin = getPlugin(VyHub.class);
         Logger logger = plugin.getLogger();
 
         Map<String, String> config = loadConfig();
@@ -125,8 +122,8 @@ public class VyHub extends JavaPlugin {
 
         HttpResponse<String> response = Utility.sendRequest("/user/current", Types.GET);
 
-        if (response == null || (response.statusCode() != 200 &&  response.statusCode() != 307)) {
-            playerTimeID = scheduler.runTaskTimer(plugin, SvStatistics::playerTime, 20L*1L, 20L*60L).getTaskId();
+        if (response == null || (response.statusCode() != 200 && response.statusCode() != 307)) {
+            playerTimeID = scheduler.runTaskTimer(plugin, SvStatistics::playerTime, 20L * 1L, 20L * 60L).getTaskId();
             commandRegistration();
             logger.warning("Cannot connect to VyHub API! Please follow the installation instructions.");
             return;

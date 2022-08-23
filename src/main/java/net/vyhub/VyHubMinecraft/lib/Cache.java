@@ -2,22 +2,18 @@ package net.vyhub.VyHubMinecraft.lib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
 
 
 public class Cache<T> {
     private String filename;
-    private Type  type;
+    private Type type;
 
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
