@@ -176,7 +176,12 @@ public class SvBans implements CommandExecutor {
 
         Player bannnedPlayer = Bukkit.getPlayer(UUID.fromString(playerID));
         if (bannnedPlayer != null) {
-            bannnedPlayer.kickPlayer(String.format("You are banned from this server.\nReason: %s", vyhubBan.getReason()));
+            VyHub.scheduler.runTask(VyHub.plugin, new Runnable() {
+                @Override
+                public void run() {
+                    bannnedPlayer.kickPlayer(String.format("You are banned from this server.\nReason: %s", vyhubBan.getReason()));
+                }
+            });
         }
 
         return true;
@@ -204,7 +209,7 @@ public class SvBans implements CommandExecutor {
         String vyHubAdminUserID = null;
         if (!minecraftBan.getSource().equals("CONSOLE") && !minecraftBan.getSource().equals("Server")) {
             try {
-                Player sourcePlayer = Bukkit.getPlayer(UUID.fromString(minecraftBan.getSource()));
+                Player sourcePlayer = Bukkit.getPlayer(minecraftBan.getSource());
 
                 if (sourcePlayer != null) {
                     VyHubUser admin = SvUser.getUser(sourcePlayer.getUniqueId().toString());
