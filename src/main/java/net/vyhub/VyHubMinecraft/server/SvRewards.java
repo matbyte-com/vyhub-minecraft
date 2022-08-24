@@ -52,7 +52,7 @@ public class SvRewards implements Listener {
             stringBuilder.deleteCharAt(stringBuilder.length() - 1);
         }
 
-        HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + SvServer.serverbundleID + "&for_server_id=" + VyHub.config.get("serverID") + "&" +
+        HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + SvServer.serverbundleID + "&for_server_id=" + VyHub.config.get("server_id") + "&" +
                 stringBuilder, Types.GET);
 
         if (resp != null && resp.statusCode() == 200) {
@@ -75,7 +75,7 @@ public class SvRewards implements Listener {
             rewards = new HashMap<>();
         }
 
-        HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + SvServer.serverbundleID + "&for_server_id=" + VyHub.config.get("serverID") +
+        HttpResponse<String> resp = Utility.sendRequest("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id=" + SvServer.serverbundleID + "&for_server_id=" + VyHub.config.get("server_id") +
                 "&user_id=" +
                 user.getId(), Types.GET);
 
@@ -164,7 +164,7 @@ public class SvRewards implements Listener {
 
     public static synchronized void sendExecuted() {
         List<String> serverID = new ArrayList<>();
-        serverID.add(VyHub.config.get("serverID"));
+        serverID.add(VyHub.config.get("server_id"));
 
         List<String> newExecutedAndSentRewards = new ArrayList<>();
         HashMap<String, Object> values = new HashMap<>() {{

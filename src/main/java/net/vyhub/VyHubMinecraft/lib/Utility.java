@@ -37,10 +37,10 @@ public class Utility {
 
     public static HttpResponse<String> sendRequestBody(String endpoint, Types type, String body) {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(VyHub.config.get("apiURL") + endpoint))
-                .setHeader("Authorization", "Bearer " + VyHub.config.get("apiKey"))
+                .uri(URI.create(VyHub.config.get("api_url") + endpoint))
+                .setHeader("Authorization", "Bearer " + VyHub.config.get("api_key"))
                 .method(type.name(), (body != null ? HttpRequest.BodyPublishers.ofString(body) : HttpRequest.BodyPublishers.noBody()))
-                .timeout(Duration.ofSeconds(2))
+                .timeout(Duration.ofSeconds(5))
                 .build();
 
         HttpResponse<String> response = null;
@@ -54,7 +54,11 @@ public class Utility {
             response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() < 200 || response.statusCode() > 399) {
-                logger.severe(String.format("Error %d when accessing %s: %s", response.statusCode(), endpoint, response.body()));
+                logger.severe(String.format("Error %d when accessing %s: %s", response.statusCode(), endpoint));
+
+                if (response.statusCode() != 502) {
+                    logger.severe(String.format("Error Message: %s", response.body()));
+                }
             }
         } catch (IOException | InterruptedException e) {
             logger.severe("VyHub API is not reachable");

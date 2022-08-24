@@ -57,7 +57,7 @@ public class SvAdverts {
 
     private static void showAdvert(VyHubAdvert advert) {
         List<String> lines = List.of(advert.getContent().split(System.lineSeparator()));
-        String prefix = String.format("%s%s", ChatColor.BLUE, VyHub.config.getOrDefault("advertPrefix", "[★] "));
+        String prefix = String.format("%s%s", ChatColor.BLUE, VyHub.config.getOrDefault("advert_prefix", "[★] "));
 
         for (String line : lines) {
             line = replaceColorTags(line);

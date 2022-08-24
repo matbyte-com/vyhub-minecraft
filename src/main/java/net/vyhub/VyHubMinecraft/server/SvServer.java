@@ -25,7 +25,7 @@ public class SvServer {
     private static Gson gson = new Gson();
 
     public static VyHubServer getServerInformation() {
-        String serverID = VyHub.config.get("serverID");
+        String serverID = VyHub.config.get("server_id");
 
         if (serverID == null) {
             return null;
@@ -78,6 +78,6 @@ public class SvServer {
             put("is_alive", "true");
         }};
 
-        Utility.sendRequestBody("/server/" + VyHub.config.get("serverID"), Types.PATCH, Utility.createRequestBody(values));
+        Utility.sendRequestBody("/server/" + VyHub.config.get("server_id"), Types.PATCH, Utility.createRequestBody(values));
     }
 }

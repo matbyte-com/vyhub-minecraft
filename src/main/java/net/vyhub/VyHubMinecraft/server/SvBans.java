@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import net.vyhub.VyHubMinecraft.Entity.MinecraftBan;
 import net.vyhub.VyHubMinecraft.Entity.VyHubBan;
 import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
+import net.vyhub.VyHubMinecraft.VyHub;
 import net.vyhub.VyHubMinecraft.lib.Cache;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
@@ -258,8 +259,7 @@ public class SvBans implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender.isOp()) {
             if (args.length == 0) {
-                Utility.sendUsage(sender, "/timeban <player> <time in minutes> <reason>");
-                return true;
+                return false;
             }
 
             //args[0] = Player, args[1] = time, args[2] =reason
@@ -283,7 +283,7 @@ public class SvBans implements CommandExecutor {
             } else {
                 Utility.sendUsage(sender, "Player must be online.");
             }
-            return false;
+            return true;
         }
         return true;
     }

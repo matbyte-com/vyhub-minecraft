@@ -30,9 +30,9 @@ public class VyHub extends JavaPlugin {
 
     public static Map<String, String> config = new HashMap<>();
 
-    private static Logger logger = Bukkit.getServer().getLogger();
+    public static Logger logger = Bukkit.getServer().getLogger();
 
-    private static Cache<Map<String, String>> configCache = new Cache<>(
+    public static Cache<Map<String, String>> configCache = new Cache<>(
             "config",
             new TypeToken<HashMap<String, String>>() {
             }.getType()
@@ -47,6 +47,8 @@ public class VyHub extends JavaPlugin {
         // Plugin startup logic
         this.luckPerms = getServer().getServicesManager().load(LuckPerms.class);
         new PlayerGivenPermissionListener(this, this.luckPerms).register();
+
+        plugin.getCommand("vh_config").setExecutor(new SvConfig());
 
         readyCheckTaskID = scheduler.runTaskTimer(this, VyHub::checkReady, 0, 20L * 60L).getTaskId();
     }
@@ -71,7 +73,7 @@ public class VyHub extends JavaPlugin {
         scheduler.runTaskTimer(plugin, SvRewards::runDirectRewards, 20L * 1L, 20L * 60L);
         scheduler.runTaskTimerAsynchronously(plugin, SvStatistics::sendPlayerTime, 20L * 5L, 20L * 60L * 30L);
         scheduler.runTaskTimerAsynchronously(plugin, SvAdverts::loadAdverts, 20L * 1L, 20L * 60L * 5L);
-        scheduler.runTaskTimerAsynchronously(plugin, SvAdverts::nextAdvert, 20L * 5L, 20L * Integer.parseInt(VyHub.config.getOrDefault("advertInterval", "180")));
+        scheduler.runTaskTimerAsynchronously(plugin, SvAdverts::nextAdvert, 20L * 5L, 20L * Integer.parseInt(VyHub.config.getOrDefault("advert_interval", "180")));
     }
 
 
@@ -92,15 +94,15 @@ public class VyHub extends JavaPlugin {
     public static Map<String, String> loadConfig() {
         Map<String, String> configMap = configCache.load();
 
-        if (configMap == null) {
-            logger.log(Level.WARNING, "Config File does not exist. Please update config.json File");
+        if (configMap == null || configMap.get("api_url") == null || configMap.get("api_key") == null || configMap.get("server_id") == null) {
+            logger.log(Level.WARNING, "Config file does not exist or is invalid, creating new one...");
 
             config = new HashMap<>();
-            config.put("apiURL", "");
-            config.put("apiKey", "");
-            config.put("serverID", "");
-            config.put("advertPrefix", "[★] ");
-            config.put("advertInterval", "180");
+            config.put("api_url", "");
+            config.put("api_key", "");
+            config.put("server_id", "");
+            config.put("advert_prefix", "[★] ");
+            config.put("advert_interval", "180");
 
             configCache.save(config);
         } else {
@@ -115,7 +117,7 @@ public class VyHub extends JavaPlugin {
 
         Map<String, String> config = loadConfig();
 
-        if (config.get("apiURL").isEmpty() || config.get("apiKey").isEmpty() || config.get("serverID").isEmpty()) {
+        if (config.get("api_url").isEmpty() || config.get("api_key").isEmpty() || config.get("server_id").isEmpty()) {
             logger.warning("VyHub config is missing values! Please follow the installation instructions.");
             return;
         }
