@@ -10,16 +10,18 @@ public class AppliedReward {
     private Reward reward;
     private Map<String, String> user;
     private String applied_packet_id;
+    private AppliedPacket applied_packet;
 
     private String status;
     private List<String> executed_on;
 
-    public AppliedReward(String id, String active, Reward reward, Map<String, String> user, String applied_packet_id, String status, List<String> executed_on) {
+    public AppliedReward(String id, String active, Reward reward, Map<String, String> user, String applied_packet_id, AppliedPacket applied_packet, String status, List<String> executed_on) {
         this.id = id;
         this.active = active;
         this.reward = reward;
         this.user = user;
         this.applied_packet_id = applied_packet_id;
+        this.applied_packet = applied_packet;
         this.status = status;
         this.executed_on = executed_on;
     }
@@ -78,5 +80,13 @@ public class AppliedReward {
 
     public void setExecuted_on(List<String> executed_on) {
         this.executed_on = executed_on;
+    }
+
+    public AppliedPacket getApplied_packet() {
+        return applied_packet;
+    }
+
+    public void setApplied_packet(AppliedPacket applied_packet) {
+        this.applied_packet = applied_packet;
     }
 }

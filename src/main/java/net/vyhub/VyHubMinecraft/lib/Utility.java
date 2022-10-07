@@ -54,7 +54,7 @@ public class Utility {
             response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() < 200 || response.statusCode() > 399) {
-                logger.severe(String.format("Error %d when accessing %s: %s", response.statusCode(), endpoint));
+                logger.severe(String.format("Error %d when accessing %s:", response.statusCode(), endpoint));
 
                 if (response.statusCode() != 502) {
                     logger.severe(String.format("Error Message: %s", response.body()));

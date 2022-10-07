@@ -133,7 +133,7 @@ public class SvRewards implements Listener {
                     boolean success = true;
                     if (reward.getType().equals("COMMAND")) {
                         String command = data.get("command");
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), stringReplace(command, player, appliedReward.getApplied_packet_id()));
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), stringReplace(command, player, appliedReward));
                     } else {
                         success = false;
 
@@ -259,13 +259,22 @@ public class SvRewards implements Listener {
         executeReward(eventList, player.getUniqueId().toString());
     }
 
-    public static String stringReplace(String command, Player player, String appliedPacketId) {
+    public static String stringReplace(String command, Player player, AppliedReward appliedReward) {
         String newString = command;
         newString = newString.replace("%nick%", player.getName());
         newString = newString.replace("%user_id%", SvUser.getUser(player.getUniqueId().toString()).getId());
-        newString = newString.replace("%applied_packet_id%", appliedPacketId);
+        newString = newString.replace("%applied_packet_id%", appliedReward.getApplied_packet_id());
         newString = newString.replace("%player_id%", player.getUniqueId().toString());
         newString = newString.replace("%player_ip_address%", player.getAddress().getAddress().toString().replace("/", ""));
+
+        String purchaseAmount = "-";
+
+        if (appliedReward.getApplied_packet().getPurchase() != null) {
+            purchaseAmount = appliedReward.getApplied_packet().getPurchase().getAmount_text();
+        }
+
+        newString = newString.replace("%purchase_amount%", purchaseAmount);
+        newString = newString.replace("%packet_title%", appliedReward.getApplied_packet().getPacket().getTitle());
 
         return newString;
     }
