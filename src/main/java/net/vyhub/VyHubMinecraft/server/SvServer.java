@@ -61,7 +61,7 @@ public class SvServer {
             if (user != null) {
                 HashMap<String, Object> map = new HashMap<>();
                 HashMap<String, String> extra = new HashMap<>();
-                extra.put("Ping", player.getPing() + " ms");
+                // extra.put("Ping", player.getPing() + " ms");
                 // extra.put("World", player.getWorld().getName());
 
                 map.put("user_id", user.getId());

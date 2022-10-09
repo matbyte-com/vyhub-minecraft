@@ -3,6 +3,7 @@ package net.vyhub.VyHubMinecraft.lib;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -39,7 +40,14 @@ public class Cache<T> {
             throw new IllegalArgumentException("Data cannot be null");
         }
 
-        try (FileWriter file = new FileWriter(filename)) {
+        File f = new File(filename);
+
+        if (!f.exists()) {
+            File parent = f.getParentFile();
+            parent.mkdirs();
+        }
+
+        try (FileWriter file = new FileWriter(f)) {
             file.write(toJson(data));
             file.flush();
         } catch (IOException e) {

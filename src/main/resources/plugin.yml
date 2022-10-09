@@ -1,7 +1,7 @@
 name: VyHub
 version: '${project.version}'
 main: net.vyhub.VyHubMinecraft.VyHub
-api-version: 1.18
+api-version: 1.13
 
 depend:
   - LuckPerms
