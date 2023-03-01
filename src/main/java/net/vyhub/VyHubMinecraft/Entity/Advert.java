@@ -1,12 +1,12 @@
 package net.vyhub.VyHubMinecraft.Entity;
 
-public class VyHubAdvert {
+public class Advert {
     private String id;
     private String title;
     private String content;
     private String color;
 
-    public VyHubAdvert(String id, String title, String content, String color) {
+    public Advert(String id, String title, String content, String color) {
         this.id = id;
         this.title = title;
         this.content = content;

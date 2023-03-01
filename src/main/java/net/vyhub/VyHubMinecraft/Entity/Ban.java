@@ -1,6 +1,6 @@
 package net.vyhub.VyHubMinecraft.Entity;
 
-public class VyHubBan {
+public class Ban {
     private String id;
     private String reason;
     private Integer length;
@@ -8,7 +8,7 @@ public class VyHubBan {
     private String status;
     private Boolean active;
 
-    public VyHubBan(String id, String reason, Integer length, String ends_on, String status, Boolean active) {
+    public Ban(String id, String reason, Integer length, String ends_on, String status, Boolean active) {
         this.id = id;
         this.reason = reason;
         this.length = length;

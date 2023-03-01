@@ -2,13 +2,13 @@ package net.vyhub.VyHubMinecraft.Entity;
 
 import java.util.Map;
 
-public class VyHubServer {
+public class Server {
     private String name;
     private String serverbundle_id;
     private Map<String, String> extra;
     private String id;
 
-    public VyHubServer(String name, String serverbundle_id, Map<String, String> extra, String id) {
+    public Server(String name, String serverbundle_id, Map<String, String> extra, String id) {
         this.name = name;
         this.serverbundle_id = serverbundle_id;
         this.extra = extra;
