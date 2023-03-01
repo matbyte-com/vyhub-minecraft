@@ -2,7 +2,7 @@ package net.vyhub.VyHubMinecraft.server;
 
 
 import com.google.gson.Gson;
-import net.vyhub.VyHubMinecraft.Entity.VyHubServer;
+import net.vyhub.VyHubMinecraft.Entity.Server;
 import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
 import net.vyhub.VyHubMinecraft.VyHub;
 import net.vyhub.VyHubMinecraft.lib.Cache;
@@ -19,12 +19,12 @@ import java.util.Map;
 
 public class SvServer {
 
-    private static Cache<VyHubServer> serverCache = new Cache<>("server", VyHubServer.class);
+    private static Cache<Server> serverCache = new Cache<>("server", Server.class);
     public static String serverbundleID = null;
 
     private static Gson gson = new Gson();
 
-    public static VyHubServer getServerInformation() {
+    public static Server getServerInformation() {
         String serverID = VyHub.config.get("server_id");
 
         if (serverID == null) {
@@ -33,12 +33,12 @@ public class SvServer {
 
         HttpResponse<String> response = Utility.sendRequest(String.format("/server/%s", serverID), Types.GET);
 
-        VyHubServer server;
+        Server server;
 
         if (response == null || response.statusCode() != 200) {
             server = serverCache.load();
         } else {
-            server = gson.fromJson(response.body(), VyHubServer.class);
+            server = gson.fromJson(response.body(), Server.class);
         }
 
         if (server == null) {

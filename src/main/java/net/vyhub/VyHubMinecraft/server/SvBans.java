@@ -3,7 +3,7 @@ package net.vyhub.VyHubMinecraft.server;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import net.vyhub.VyHubMinecraft.Entity.MinecraftBan;
-import net.vyhub.VyHubMinecraft.Entity.VyHubBan;
+import net.vyhub.VyHubMinecraft.Entity.Ban;
 import net.vyhub.VyHubMinecraft.Entity.VyHubUser;
 import net.vyhub.VyHubMinecraft.VyHub;
 import net.vyhub.VyHubMinecraft.lib.Cache;
@@ -34,7 +34,7 @@ public class SvBans implements CommandExecutor {
     private static Set<String> processedPlayers = new HashSet<>();
 
     private static Map<String, MinecraftBan> minecraftBans = null;
-    private static Map<String, List<VyHubBan>> vyhubBans = null;
+    private static Map<String, List<Ban>> vyhubBans = null;
 
     private static Gson gson = new Gson();
 
@@ -74,7 +74,7 @@ public class SvBans implements CommandExecutor {
             return;
         }
 
-        Type vyhubBansType = new TypeToken<Map<String, List<VyHubBan>>>() {
+        Type vyhubBansType = new TypeToken<Map<String, List<Ban>>>() {
         }.getType();
         vyhubBans = gson.fromJson(response.body(), vyhubBansType);
     }
@@ -166,7 +166,7 @@ public class SvBans implements CommandExecutor {
         saveProcessedPlayers();
     }
 
-    public static boolean addMinecraftBan(String playerID, VyHubBan vyhubBan) {
+    public static boolean addMinecraftBan(String playerID, Ban vyhubBan) {
         Date endDate = null;
         if (vyhubBan.getEnds_on() != null) {
             ZonedDateTime expiresDate = ZonedDateTime.parse(vyhubBan.getEnds_on(), isoDateFormatter);

@@ -2,7 +2,7 @@ package net.vyhub.VyHubMinecraft.server;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import net.vyhub.VyHubMinecraft.Entity.VyHubAdvert;
+import net.vyhub.VyHubMinecraft.Entity.Advert;
 import net.vyhub.VyHubMinecraft.VyHub;
 import net.vyhub.VyHubMinecraft.lib.Types;
 import net.vyhub.VyHubMinecraft.lib.Utility;
@@ -15,7 +15,7 @@ import java.util.List;
 
 public class SvAdverts {
     private static Gson gson = new Gson();
-    private static List<VyHubAdvert> adverts = new ArrayList<>();
+    private static List<Advert> adverts = new ArrayList<>();
 
     private static int currentAdvert = 0;
 
@@ -26,7 +26,7 @@ public class SvAdverts {
             return;
         }
 
-        adverts = gson.fromJson(response.body(), new TypeToken<ArrayList<VyHubAdvert>>() {
+        adverts = gson.fromJson(response.body(), new TypeToken<ArrayList<Advert>>() {
         }.getType());
     }
 
@@ -39,7 +39,7 @@ public class SvAdverts {
             currentAdvert = 0;
         }
 
-        VyHubAdvert advert = adverts.get(currentAdvert);
+        Advert advert = adverts.get(currentAdvert);
         showAdvert(advert);
     }
 
@@ -55,7 +55,7 @@ public class SvAdverts {
         return text;
     }
 
-    private static void showAdvert(VyHubAdvert advert) {
+    private static void showAdvert(Advert advert) {
         List<String> lines = List.of(advert.getContent().split(System.lineSeparator()));
         String prefix = String.format("%s%s", ChatColor.BLUE, VyHub.config.getOrDefault("advert_prefix", "[★] "));
 
