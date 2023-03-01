@@ -2,6 +2,12 @@ package net.vyhub.VyHubMinecraft;
 
 import com.google.common.reflect.TypeToken;
 import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.event.EventBus;
+import net.luckperms.api.event.node.NodeAddEvent;
+import net.luckperms.api.event.node.NodeClearEvent;
+import net.luckperms.api.event.node.NodeMutateEvent;
+import net.luckperms.api.event.node.NodeRemoveEvent;
 import net.vyhub.VyHubMinecraft.lib.Cache;
 import net.vyhub.VyHubMinecraft.lib.PlayerGivenPermissionListener;
 import net.vyhub.VyHubMinecraft.lib.Types;
@@ -67,6 +73,7 @@ public class VyHub extends JavaPlugin {
         SvRewards.loadExecuted();
 
         scheduler.runTaskTimerAsynchronously(plugin, SvServer::patchServer, 20L * 1L, 20L * 60L);
+        scheduler.runTaskTimerAsynchronously(plugin, SvGroups::updateGroups, 20L * 1L, 20L * 60L * 5L);
         scheduler.runTaskTimerAsynchronously(plugin, SvBans::syncBans, 20L * 1L, 20L * 60L);
         scheduler.runTaskTimerAsynchronously(plugin, SvStatistics::playerTime, 20L * 1L, 20L * 60L);
         scheduler.runTaskTimerAsynchronously(plugin, SvRewards::getRewards, 20L * 5L, 20L * 60L);
@@ -82,6 +89,13 @@ public class VyHub extends JavaPlugin {
         pluginManager.registerEvents(new SvUser(), plugin);
         pluginManager.registerEvents(new SvGroups(), plugin);
         pluginManager.registerEvents(new SvRewards(), plugin);
+
+        LuckPerms luckPerms = LuckPermsProvider.get();
+        EventBus eventBus = luckPerms.getEventBus();
+
+        eventBus.subscribe(plugin, NodeAddEvent.class, SvGroups::onNodeMutate);
+        eventBus.subscribe(plugin, NodeRemoveEvent.class, SvGroups::onNodeMutate);
+        eventBus.subscribe(plugin, NodeClearEvent.class, SvGroups::onNodeMutate);
     }
 
     private static void commandRegistration() {
