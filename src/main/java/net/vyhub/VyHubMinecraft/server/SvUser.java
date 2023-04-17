@@ -14,14 +14,18 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.net.http.HttpResponse;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 
 public class SvUser implements Listener {
 
     public static Map<String, VyHubUser> vyHubPlayers = new HashMap<>();
     private static Logger logger = Bukkit.getServer().getLogger();
+
+    private static Semaphore userCreateSem = new Semaphore(1, true);
 
     @EventHandler
     public static void onPlayerJoin(PlayerJoinEvent event) {
@@ -57,6 +61,10 @@ public class SvUser implements Listener {
     }
 
     public static VyHubUser getUser(String UUID) {
+        return getUser(UUID, true);
+    }
+
+    public static VyHubUser getUser(String UUID, Boolean create) {
         if (UUID == null || UUID.isEmpty()) {
             throw new IllegalArgumentException("UUID may not be empty or null.");
         }
@@ -69,9 +77,24 @@ public class SvUser implements Listener {
 
         String userInformation = "";
 
-        HttpResponse<String> response = Utility.sendRequest("/user/" + UUID + "?type=MINECRAFT", Types.GET);
+        HttpResponse<String> response = Utility.sendRequest("/user/" + UUID + "?type=MINECRAFT", Types.GET,
+                Arrays.asList(404));
 
-        if (response != null) {
+        if (response != null && create) {
+            try {
+                userCreateSem.acquire();
+            } catch (InterruptedException e) {
+                return null;
+            }
+
+            VyHubUser vyHubUser = getUser(UUID, false);
+
+            if (vyHubUser != null) {
+                return vyHubUser;
+            }
+
+            logger.info(String.format("Could not find VyHub user for player %s, creating..", UUID));
+
             if (response.statusCode() == 404) {
                 userInformation = createUser(UUID);
 
@@ -85,9 +108,12 @@ public class SvUser implements Listener {
             }
 
             Gson gson = new Gson();
-            VyHubUser vyHubUser = gson.fromJson(userInformation, VyHubUser.class);
+            vyHubUser = gson.fromJson(userInformation, VyHubUser.class);
 
             vyHubPlayers.put(UUID, vyHubUser);
+
+            userCreateSem.release();
+
             return vyHubUser;
         } else {
             return null;
