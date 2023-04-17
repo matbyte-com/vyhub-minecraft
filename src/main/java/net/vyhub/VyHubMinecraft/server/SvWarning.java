@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.net.http.HttpResponse;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class SvWarning implements CommandExecutor {
@@ -36,11 +37,17 @@ public class SvWarning implements CommandExecutor {
             adminUserID = "?morph_user_id=" + vyHubAdminUser.getId();
         }
 
-        HttpResponse<String> response = Utility.sendRequestBody(String.format("/warning/%s", adminUserID), Types.POST, Utility.createRequestBody(values));
+        HttpResponse<String> response = Utility.sendRequestBody(String.format("/warning/%s", adminUserID), Types.POST, Utility.createRequestBody(values),
+                Arrays.asList(403));
 
         if (response == null || response.statusCode() != 200) {
             if (adminPlayer != null) {
-                adminPlayer.sendMessage("§c[WARN] §9Error while warning player. Please try again later.");
+                if (response.statusCode() == 403) {
+                    adminPlayer.sendMessage("§c[WARN] §9You are not permitted to warn players.");
+                } else {
+                    adminPlayer.sendMessage(String.format("§c[WARN] §9Error %s while warning player. Please try again later.",
+                            response.statusCode()));
+                }
             }
         } else {
             player.sendMessage(String.format("§c[WARN] §9You have received a warning:§6 %s", reason));
