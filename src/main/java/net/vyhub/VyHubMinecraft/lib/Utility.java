@@ -13,6 +13,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class Utility {
@@ -35,7 +36,7 @@ public class Utility {
         return requestBody;
     }
 
-    public static HttpResponse<String> sendRequestBody(String endpoint, Types type, String body) {
+    public static HttpResponse<String> sendRequestBody(String endpoint, Types type, String body, List<Integer> ignoreCodes) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(VyHub.config.get("api_url") + endpoint))
                 .setHeader("Authorization", "Bearer " + VyHub.config.get("api_key"))
@@ -54,19 +55,29 @@ public class Utility {
             response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() < 200 || response.statusCode() > 399) {
-                logger.severe(String.format("Error %d when accessing %s:", response.statusCode(), endpoint));
+                if (ignoreCodes == null || !ignoreCodes.contains(response.statusCode())) {
+                    logger.severe(String.format("Error %d when accessing %s:", response.statusCode(), endpoint));
 
-                if (response.statusCode() != 502) {
-                    logger.severe(String.format("Error Message: %s", response.body()));
+                    if (response.statusCode() != 502) {
+                        logger.severe(String.format("Error Message: %s", response.body()));
+                    }
                 }
             }
         } catch (IOException | InterruptedException e) {
-            logger.severe("VyHub API is not reachable");
+            logger.severe(String.format("VyHub API is not reachable: %s", e.getMessage()));
         }
         return response;
     }
 
+    public static HttpResponse<String> sendRequestBody(String endpoint, Types type, String body) {
+        return sendRequestBody(endpoint, type, body, null);
+    }
+
     public static HttpResponse<String> sendRequest(String endpoint, Types type) {
-        return sendRequestBody(endpoint, type, null);
+        return sendRequestBody(endpoint, type, null, null);
+    }
+
+    public static HttpResponse<String> sendRequest(String endpoint, Types type, List<Integer> ignoreCodes) {
+        return sendRequestBody(endpoint, type, null, ignoreCodes);
     }
 }
