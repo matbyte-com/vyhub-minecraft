@@ -1,0 +1,27 @@
+name: VyHub
+version: '${project.version}'
+main: net.vyhub.VyHubMinecraft.VyHub
+api-version: 1.13
+
+depend:
+  - LuckPerms
+commands:
+  login:
+    description: 'Login user for VyHub'
+    usage: '/login <uuid>'
+    aliases: ['l']
+
+  timeban:
+    description: 'Ban user for a certain time'
+    aliases: ['tb']
+    usage: '/timeban <player> <minutes> <reason>'
+
+  warn:
+    description: 'Warn a player'
+    aliases: ['w']
+    usage: '/warn <player> <reason>'
+
+  vh_config:
+    description: 'Set VyHub config values'
+    usage: '/vh_config <key> <value>'
+
