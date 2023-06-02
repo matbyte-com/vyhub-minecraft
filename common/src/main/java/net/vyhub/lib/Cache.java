@@ -13,10 +13,10 @@ import java.nio.file.Paths;
 
 
 public class Cache<T> {
-    private String filename;
-    private Type type;
+    private final String filename;
+    private final Type type;
 
-    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public Cache(String name, Type type) {
         this.filename = String.format("plugins/VyHub/%s.json", name);

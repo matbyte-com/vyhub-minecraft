@@ -2,7 +2,7 @@ package net.vyhub;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.vyhub.Entity.Advert;
+import net.vyhub.entity.Advert;
 
 public interface VyHubAPI {
     static final String API_URL = "https://api.vyhub.net";

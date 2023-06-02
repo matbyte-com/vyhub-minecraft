@@ -2,7 +2,7 @@ package net.vyhub;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.vyhub.Entity.*;
+import net.vyhub.entity.*;
 import okhttp3.*;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface VyHubAPI {
-    static final String API_URL = "https://api.vyhub.net";
     static final Gson gson = new GsonBuilder().create();
 
     public static VyHubAPI create(final String API_URL, final String token) {
@@ -46,7 +45,7 @@ public interface VyHubAPI {
     }
 
     @GET("/advert/?active=true&serverbundle_id={id}")
-    public Call<Advert> getAdverts(@Path("id") String id);
+    public Call<List<Advert>> getAdverts(@Path("id") String id);
 
     @PATCH("/auth/request/{validation_uuid}")
     public Call<Object> confirmAuth(@Path("validation_uuid") String validation_uuid, @Body RequestBody body);
@@ -64,10 +63,10 @@ public interface VyHubAPI {
     public Call<Server> patchServer(@Path("id") String id, @Body RequestBody body);
 
     @GET("/user/attribute/definition/playtime")
-    public Call<Object> checkPlaytimeDefinition();
+    public Call<Definition> getPlaytimeDefinition();
 
     @POST("/user/attribute/definition")
-    public Call<Object> createPlaytimeDefinition(@Body RequestBody body);
+    public Call<Definition> createPlaytimeDefinition(@Body RequestBody body);
 
     @POST("/user/attribute")
     public Call<Object> sendPlayerTime(@Body RequestBody body);
@@ -76,7 +75,7 @@ public interface VyHubAPI {
     public Call<Warn> createWarning(@Path("admin_id") String admin_id, @Body RequestBody body);
 
     @GET("/server/bundle/{serverbundle_id}/ban?active=true")
-    public Call<Ban> getBan(@Path("serverbundle_id") String serverbundle_id);
+    public Call<Map<String, List<Ban>>> getBans(@Path("serverbundle_id") String serverbundle_id);
 
     @POST("/ban/?morph_user_id={admin_id}")
     public Call<Ban> createBan(@Path("admin_id") String admin_id, @Body RequestBody body);
@@ -103,7 +102,7 @@ public interface VyHubAPI {
     public Call<Membership> deleteAllMemberships(@Path("user_id") String user_id, @Path("serverbundle_id") String serverbundle_id);
 
     @GET("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id={serverbundle_id}&for_server_id={server_id}&{user_ids}")
-    public Call<Map<String, List<AppliedReward>>> getRewards(@Path("serverbundle_id") String serverbundle_id, @Path("server_id") String server_id, @Path("user_ids") String user_ids);
+    public Call<Map<String, List<AppliedReward>>>  getRewards(@Path("serverbundle_id") String serverbundle_id, @Path("server_id") String server_id, @Path("user_ids") String user_ids);
 
     @PATCH("/packet/reward/applied/{reward_id}")
     public Call<AppliedReward> sendExecutedRewards(@Path("reward_id") String reward_id, @Body RequestBody body);

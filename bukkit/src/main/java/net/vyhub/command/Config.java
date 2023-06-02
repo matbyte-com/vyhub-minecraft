@@ -1,20 +1,23 @@
 package net.vyhub.command;
 
-import net.vyhub.lib.Utility;
-import org.bukkit.Bukkit;
+import net.vyhub.BukkitVyHubPlugin;
+import net.vyhub.config.VyHubConfiguration;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import java.util.logging.Logger;
-
 public class Config implements CommandExecutor {
-    private static Logger logger = Bukkit.getServer().getLogger();
+    private final BukkitVyHubPlugin plugin;
+
+    public Config(final BukkitVyHubPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.isOp()) {
-            sender.sendMessage("§4This command is only for admins.");
+            sender.sendMessage(ChatColor.DARK_RED + plugin.getI18n().get("commandOnlyForAdmins"));
             return true;
         }
 
@@ -30,7 +33,7 @@ public class Config implements CommandExecutor {
                 return false;
             }
 
-            Utility.setConfigValue(key, value);
+            VyHubConfiguration.setConfigValue(key, value);
             return true;
         }
 
