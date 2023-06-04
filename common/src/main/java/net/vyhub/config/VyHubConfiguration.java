@@ -69,6 +69,10 @@ public class VyHubConfiguration {
         return config.get("advert_interval");
     }
 
+    public static String getAdvertPrefix() {
+        return config.get("advert_prefix");
+    }
+
     public static void updateCache() {
         configCache.save(config);
     }

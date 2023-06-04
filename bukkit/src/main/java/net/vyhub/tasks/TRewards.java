@@ -22,7 +22,7 @@ import static java.util.logging.Level.WARNING;
 
 public class TRewards extends ARewards implements Listener {
 
-    protected TRewards(VyHubPlatform platform) {
+    protected TRewards(VyHubPlatform platform, AUser aUser) {
         super(platform, aUser);
     }
 
@@ -145,10 +145,10 @@ public class TRewards extends ARewards implements Listener {
         executeReward(eventList, player.getUniqueId().toString());
     }
 
-    public static String stringReplace(String command, Player player, AppliedReward appliedReward) {
+    public String stringReplace(String command, Player player, AppliedReward appliedReward) {
         String newString = command;
         newString = newString.replace("%nick%", player.getName());
-        newString = newString.replace("%user_id%", AUser.getUser(player.getUniqueId().toString()).getId());
+        newString = newString.replace("%user_id%", getAUser().getUser(player.getUniqueId().toString()).getId());
         newString = newString.replace("%applied_packet_id%", appliedReward.getApplied_packet_id());
         newString = newString.replace("%player_id%", player.getUniqueId().toString());
         newString = newString.replace("%player_ip_address%", player.getAddress().getAddress().toString().replace("/", ""));

@@ -2,8 +2,7 @@ package net.vyhub.tasks;
 
 import net.vyhub.VyHubPlatform;
 import net.vyhub.abstractClasses.AAdvert;
-import net.vyhub.BukkitVyHubPlugin;
-import net.vyhub.VyHub;
+import net.vyhub.config.VyHubConfiguration;
 import net.vyhub.entity.Advert;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -34,7 +33,7 @@ public class TAdvert extends AAdvert {
 
     public void showAdvert(Advert advert) {
         List<String> lines = List.of(advert.getContent().split(System.lineSeparator()));
-        String prefix = String.format("%s%s", ChatColor.BLUE, VyHub.config.getOrDefault("advert_prefix", "[★] "));
+        String prefix = String.format("%s%s", ChatColor.BLUE, VyHubConfiguration.getAdvertPrefix());
 
         for (String line : lines) {
             line = replaceColorTags(line);

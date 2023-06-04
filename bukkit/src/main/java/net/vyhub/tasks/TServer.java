@@ -16,14 +16,14 @@ import java.util.List;
 import java.util.Map;
 
 public class TServer extends AServer {
-    public TServer(VyHubPlatform platform) {
-        super(platform);
+    public TServer(VyHubPlatform platform, AUser aUser) {
+        super(platform, aUser);
     }
     public void patchServer() {
         List<Map<String, Object>> user_activities = new LinkedList<>();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            VyHubUser user = AUser.getUser(player.getUniqueId().toString());
+            VyHubUser user = getAUser().getUser(player.getUniqueId().toString());
 
             if (user != null) {
                 HashMap<String, Object> map = new HashMap<>();

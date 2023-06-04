@@ -71,7 +71,7 @@ public class BukkitVyHubPlugin extends JavaPlugin {
         warn = new Warn(this.platform, this.ban, this.tUser);
         tAdvert = new TAdvert(this.platform);
         tGroups = new TGroups(this.platform, this.tUser);
-        tServer = new TServer(this.platform);
+        tServer = new TServer(this.platform, this.tUser);
         tStatistics = new TStatistics(this.platform, this.tUser);
 
         // Configuration, I18N and API Client

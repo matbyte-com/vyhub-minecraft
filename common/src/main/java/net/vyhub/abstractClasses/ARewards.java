@@ -33,6 +33,10 @@ public abstract class ARewards {
         this.aUser = aUser;
     }
 
+    public AUser getAUser() {
+        return aUser;
+    }
+
     public VyHubPlatform getPlatform() {
         return platform;
     }

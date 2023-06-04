@@ -33,7 +33,7 @@ public interface VyHubAPI {
                                 Request original = chain.request();
 
                                 Request request = original.newBuilder()
-                                        .header("X-Buycraft-Secret", token)
+                                        .header("Authorization", "Bearer " + token)
                                         .header("Accept", "application/json")
                                         .method(original.method(), original.body())
                                         .build();

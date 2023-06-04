@@ -13,9 +13,15 @@ public abstract class AServer {
     public static String serverbundleID = null;
 
     public final VyHubPlatform platform;
+    private final AUser aUser;
 
-    public AServer(VyHubPlatform platform) {
+    public AServer(VyHubPlatform platform, AUser aUser) {
         this.platform = platform;
+        this.aUser = aUser;
+    }
+
+    public AUser getAUser() {
+        return aUser;
     }
 
     public Server getServerInformation() {
