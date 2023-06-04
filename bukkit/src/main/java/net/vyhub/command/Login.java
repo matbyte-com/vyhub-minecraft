@@ -1,6 +1,6 @@
 package net.vyhub.command;
 
-import net.vyhub.BukkitVyHubPlugin;
+import net.vyhub.VyHubPlugin;
 import net.vyhub.lib.Utility;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -14,9 +14,9 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class Login implements CommandExecutor {
-    private final BukkitVyHubPlugin plugin;
+    private final VyHubPlugin plugin;
 
-    public Login(final BukkitVyHubPlugin plugin) {
+    public Login(final VyHubPlugin plugin) {
         this.plugin = plugin;
     }
 

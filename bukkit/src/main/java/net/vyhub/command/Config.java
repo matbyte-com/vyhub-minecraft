@@ -1,6 +1,6 @@
 package net.vyhub.command;
 
-import net.vyhub.BukkitVyHubPlugin;
+import net.vyhub.VyHubPlugin;
 import net.vyhub.config.VyHubConfiguration;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -8,9 +8,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 public class Config implements CommandExecutor {
-    private final BukkitVyHubPlugin plugin;
+    private final VyHubPlugin plugin;
 
-    public Config(final BukkitVyHubPlugin plugin) {
+    public Config(final VyHubPlugin plugin) {
         this.plugin = plugin;
     }
 

@@ -1,7 +1,7 @@
 name: VyHub
 version: '${project.version}'
 description: 'VyHub plugin to manage and monetize your Minecraft server. Using VyHub you can create an store to sell items.'
-main: net.vyhub.VyHubMinecraft.VyHub
+main: net.vyhub.VyHubPlugin
 api-version: 1.13
 
 depend:

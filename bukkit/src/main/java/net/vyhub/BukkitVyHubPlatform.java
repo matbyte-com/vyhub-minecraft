@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public class BukkitVyHubPlatform implements VyHubPlatform {
-    private final BukkitVyHubPlugin plugin;
-    protected BukkitVyHubPlatform(final BukkitVyHubPlugin plugin) {
+    private final VyHubPlugin plugin;
+    protected BukkitVyHubPlatform(final VyHubPlugin plugin) {
         this.plugin = plugin;
     }
     @Override

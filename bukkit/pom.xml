@@ -10,6 +10,15 @@
     </parent>
 
     <artifactId>bukkit</artifactId>
+    <build>
+        <finalName>VyHub-Bukkit-${project.parent.version}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -20,7 +29,7 @@
         <dependency>
             <groupId>net.vyhub</groupId>
             <artifactId>common</artifactId>
-            <version>1.4.1</version>
+            <version>${project.parent.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

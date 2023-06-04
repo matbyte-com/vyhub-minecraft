@@ -11,16 +11,16 @@ import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.node.types.PermissionNode;
 import net.luckperms.api.node.types.PrefixNode;
 import net.luckperms.api.node.types.SuffixNode;
-import net.vyhub.BukkitVyHubPlugin;
+import net.vyhub.VyHubPlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 public class PlayerGivenPermissionListener {
 
-    private final BukkitVyHubPlugin plugin;
+    private final VyHubPlugin plugin;
     private final LuckPerms luckPerms;
 
-    public PlayerGivenPermissionListener(BukkitVyHubPlugin plugin, LuckPerms luckPerms) {
+    public PlayerGivenPermissionListener(VyHubPlugin plugin, LuckPerms luckPerms) {
         this.plugin = plugin;
         this.luckPerms = luckPerms;
     }

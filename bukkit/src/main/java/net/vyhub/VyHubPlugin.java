@@ -25,7 +25,7 @@ import java.io.File;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 
-public class BukkitVyHubPlugin extends JavaPlugin {
+public class VyHubPlugin extends JavaPlugin {
     public static JavaPlugin plugin;
     private LuckPerms luckPerms;
 
