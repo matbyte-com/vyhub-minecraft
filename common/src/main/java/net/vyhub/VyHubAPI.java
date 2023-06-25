@@ -44,66 +44,66 @@ public interface VyHubAPI {
                 .build().create(VyHubAPI.class);
     }
 
-    @GET("/advert/?active=true&serverbundle_id={id}")
-    public Call<List<Advert>> getAdverts(@Path("id") String id);
+    @GET("advert/?active=true")
+    public Call<List<Advert>> getAdverts(@Query("serverbundle_id") String id);
 
-    @PATCH("/auth/request/{validation_uuid}")
+    @PATCH("auth/request/{validation_uuid}")
     public Call<Object> confirmAuth(@Path("validation_uuid") String validation_uuid, @Body RequestBody body);
 
-    @POST("/user/")
+    @POST("user/")
     public Call<VyHubUser> createUser(@Body RequestBody body);
 
-    @GET("/user/{id}?type=MINECRAFT")
+    @GET("user/{id}?type=MINECRAFT")
     public Call<VyHubUser> getUser(@Path("id") String id);
 
-    @GET("/server/{id}")
+    @GET("server/{id}")
     public Call<Server> getServer(@Path("id") String id);
 
-    @PATCH("/server/{id}")
+    @PATCH("server/{id}")
     public Call<Server> patchServer(@Path("id") String id, @Body RequestBody body);
 
-    @GET("/user/attribute/definition/playtime")
+    @GET("user/attribute/definition/playtime")
     public Call<Definition> getPlaytimeDefinition();
 
-    @POST("/user/attribute/definition")
+    @POST("user/attribute/definition")
     public Call<Definition> createPlaytimeDefinition(@Body RequestBody body);
 
-    @POST("/user/attribute")
+    @POST("user/attribute")
     public Call<Object> sendPlayerTime(@Body RequestBody body);
 
-    @POST("/warning/?morph_user_id={admin_id}")
-    public Call<Warn> createWarning(@Path("admin_id") String admin_id, @Body RequestBody body);
+    @POST("warning")
+    public Call<Warn> createWarning(@Query("morph_user_id") String admin_id, @Body RequestBody body);
 
-    @GET("/server/bundle/{serverbundle_id}/ban?active=true")
+    @GET("server/bundle/{serverbundle_id}/ban?active=true")
     public Call<Map<String, List<Ban>>> getBans(@Path("serverbundle_id") String serverbundle_id);
 
-    @POST("/ban/?morph_user_id={admin_id}")
-    public Call<Ban> createBan(@Path("admin_id") String admin_id, @Body RequestBody body);
+    @POST("ban/")
+    public Call<Ban> createBan(@Query("morph_user_id") String admin_id, @Body RequestBody body);
 
-    @POST("/ban/")
+    @POST("ban/")
     public Call<Ban> createBanWithoutCreator(@Body RequestBody body);
 
-    @PATCH("/user/{user_id}/ban?serverbundle_id={serverbundle_id}")
-    public Call<Ban> unbanUser(@Path("user_id") String user_id, @Path("serverbundle_id") String serverbundle_id);
+    @PATCH("user/{user_id}/ban")
+    public Call<Ban> unbanUser(@Path("user_id") String user_id, @Query("serverbundle_id") String serverbundle_id);
 
-    @GET("/group/")
+    @GET("group/")
     public Call<List<Group>> getGroups();
 
-    @GET("/user/{user_id}/group?serverbundle_id={serverbundle_id}")
-    public Call<List<Group>> getUserGroups(@Path("user_id") String user_id, @Path("serverbundle_id") String serverbundle_id);
+    @GET("user/{user_id}/group")
+    public Call<List<Group>> getUserGroups(@Path("user_id") String user_id, @Query("serverbundle_id") String serverbundle_id);
 
-    @POST("/user/{id}/membership")
+    @POST("user/{id}/membership")
     public Call<Membership> createMembership(@Path("id") String id, @Body RequestBody body);
 
-    @DELETE("/user/{user_id}/membership/by-group?group_id={group_id}&serverbundle_id={serverbundle_id}")
-    public Call<Membership> deleteMembership(@Path("user_id") String user_id, @Path("group_id") String group_id, @Path("serverbundle_id") String serverbundle_id);
+    @DELETE("user/{user_id}/membership/by-group")
+    public Call<Membership> deleteMembership(@Path("user_id") String user_id, @Query("group_id") String group_id, @Query("serverbundle_id") String serverbundle_id);
 
-    @DELETE("/user/{user_id}/membership?serverbundle_id={serverbundle_id}")
-    public Call<Membership> deleteAllMemberships(@Path("user_id") String user_id, @Path("serverbundle_id") String serverbundle_id);
+    @DELETE("user/{user_id}/membership")
+    public Call<Membership> deleteAllMemberships(@Path("user_id") String user_id, @Query("serverbundle_id") String serverbundle_id);
 
-    @GET("/packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN&serverbundle_id={serverbundle_id}&for_server_id={server_id}&{user_ids}")
-    public Call<Map<String, List<AppliedReward>>>  getRewards(@Path("serverbundle_id") String serverbundle_id, @Path("server_id") String server_id, @Path("user_ids") String user_ids);
+    @GET("packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN")
+    public Call<Map<String, List<AppliedReward>>>  getRewards(@Query("serverbundle_id") String serverbundle_id, @Query("server_id") String server_id, @Query("user_ids") String user_ids);
 
-    @PATCH("/packet/reward/applied/{reward_id}")
+    @PATCH("packet/reward/applied/{reward_id}")
     public Call<AppliedReward> sendExecutedRewards(@Path("reward_id") String reward_id, @Body RequestBody body);
 }
