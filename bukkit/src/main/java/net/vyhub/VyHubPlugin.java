@@ -21,6 +21,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 import retrofit2.Response;
 
 import java.io.File;
+import java.util.Objects;
 
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
@@ -72,6 +73,7 @@ public class VyHubPlugin extends JavaPlugin {
         tAdvert = new TAdvert(this.platform);
         tGroups = new TGroups(this.platform, this.tUser);
         tServer = new TServer(this.platform, this.tUser);
+        tRewards = new TRewards(this.platform, this.tUser);
         tStatistics = new TStatistics(this.platform, this.tUser);
 
         // Configuration, I18N and API Client
@@ -80,8 +82,8 @@ public class VyHubPlugin extends JavaPlugin {
         httpClient = Utility.okhttp(new File(getDataFolder(), "cache"));
         final String apiBaseUrl = VyHubConfiguration.getApiUrl();
         final String apiKey = VyHubConfiguration.getApiKey();
-
-        if (apiBaseUrl == null || apiKey == null) {
+        
+        if (Objects.equals(apiBaseUrl, "") || Objects.equals(apiKey, "")) {
             getLogger().log(INFO, "Looks like this is a fresh setup. Get started by using 'vh_config' in the console.");
         } else {
             getLogger().info("Validating API credentials...");
@@ -96,6 +98,7 @@ public class VyHubPlugin extends JavaPlugin {
         new PlayerGivenPermissionListener(this, this.luckPerms).register();
 
         plugin.getCommand("vh_config").setExecutor(config);
+        plugin.getCommand("vh_setup").setExecutor(config);
 
         readyCheckTaskID = scheduler.runTaskTimer(this, this::checkReady, 0, 20L * 60L).getTaskId();
     }

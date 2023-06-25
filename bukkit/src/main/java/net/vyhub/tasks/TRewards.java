@@ -22,7 +22,7 @@ import static java.util.logging.Level.WARNING;
 
 public class TRewards extends ARewards implements Listener {
 
-    protected TRewards(VyHubPlatform platform, AUser aUser) {
+    public TRewards(VyHubPlatform platform, AUser aUser) {
         super(platform, aUser);
     }
 

@@ -44,8 +44,6 @@ public abstract class AUser {
 
     public abstract void callVyHubPlayerInitializedEvent(String playerId, String playerName);
 
-    public abstract void onPlayerJoin(Object event);
-
     public abstract void sendMessage(String playerName, String message);
 
     public VyHubUser createUser(String UUID) {

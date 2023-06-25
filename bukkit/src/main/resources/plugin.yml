@@ -26,3 +26,7 @@ commands:
     description: 'Set VyHub config values'
     usage: '/vh_config <key> <value>'
 
+  vh_setup:
+    description: 'Setup VyHub plugin'
+    usage: '/vh_setup <api_key> <api_url> <server_id>'
+
