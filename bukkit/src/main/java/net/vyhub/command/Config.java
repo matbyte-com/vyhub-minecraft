@@ -34,6 +34,8 @@ public class Config implements CommandExecutor {
             }
 
             VyHubConfiguration.setConfigValue(key, value);
+            sender.sendMessage(ChatColor.GREEN + plugin.getI18n().get("Config Saved"));
+
             return true;
         }
 

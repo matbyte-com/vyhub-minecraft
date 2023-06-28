@@ -80,15 +80,6 @@ public class VyHubPlugin extends JavaPlugin {
         VyHubConfiguration.loadConfig();
         i18n = new I18n(VyHubConfiguration.getLocale());
         httpClient = Utility.okhttp(new File(getDataFolder(), "cache"));
-        final String apiBaseUrl = VyHubConfiguration.getApiUrl();
-        final String apiKey = VyHubConfiguration.getApiKey();
-        
-        if (Objects.equals(apiBaseUrl, "") || Objects.equals(apiKey, "")) {
-            getLogger().log(INFO, "Looks like this is a fresh setup. Get started by using 'vh_config' in the console.");
-        } else {
-            getLogger().info("Validating API credentials...");
-            apiClient = VyHubAPI.create(VyHubConfiguration.getApiUrl(), VyHubConfiguration.getApiKey(), httpClient);
-        }
 
         playerTimeID = scheduler.runTaskTimer(plugin, tStatistics::playerTime, 20L * 1L, 20L * 60L).getTaskId();
 
@@ -149,11 +140,27 @@ public class VyHubPlugin extends JavaPlugin {
     }
 
     public void checkReady() {
+        String apiBaseUrl = VyHubConfiguration.getApiUrl();
+        final String apiKey = VyHubConfiguration.getApiKey();
+
+        if (!apiBaseUrl.endsWith("/")) {
+            apiBaseUrl = apiBaseUrl + "/";
+        }
+
+        if (Objects.equals(apiBaseUrl, "") || Objects.equals(apiKey, "")) {
+            getLogger().log(INFO, "Looks like this is a fresh setup. Get started by using 'vh_config' in the console.");
+        } else {
+            getLogger().info("Validating API credentials...");
+            apiClient = VyHubAPI.create(apiBaseUrl, apiKey, httpClient);
+        }
+
+
         Response response = null;
         try {
             response = apiClient.getServer(VyHubConfiguration.getServerId()).execute();
         } catch (Exception e) {
             this.platform.log(WARNING, "Cannot connect to VyHub API! Please follow the installation instructions.");
+            return;
         }
 
         if (response == null || !response.isSuccessful()) {
