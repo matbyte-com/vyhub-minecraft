@@ -32,7 +32,7 @@ public abstract class AAdvert {
     }
 
     public void nextAdvert() {
-        if (adverts.size() < 1) {
+        if (adverts == null || adverts.size() < 1) {
             return;
         }
 
@@ -42,6 +42,8 @@ public abstract class AAdvert {
 
         Advert advert = adverts.get(currentAdvert);
         showAdvert(advert);
+        if (currentAdvert + 1 == adverts.size()) currentAdvert = 0;
+        else currentAdvert++;
     }
 
     public abstract String replaceColorTags(String text);
