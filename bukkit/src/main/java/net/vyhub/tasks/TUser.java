@@ -3,6 +3,7 @@ package net.vyhub.tasks;
 import net.vyhub.VyHubPlatform;
 import net.vyhub.abstractClasses.AUser;
 import net.vyhub.event.VyHubPlayerInitializedEvent;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -36,6 +37,6 @@ public class TUser extends AUser implements Listener {
         if (player == null) {
             return;
         }
-        player.sendMessage(message);
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
     }
 }
