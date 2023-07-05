@@ -8,11 +8,15 @@ import net.vyhub.entity.VyHubUser;
 import net.vyhub.lib.Utility;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import retrofit2.Response;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+
+import static java.util.logging.Level.INFO;
+import static net.vyhub.lib.Utility.checkResponse;
 
 public class TStatistics extends AStatistics {
     public TStatistics(VyHubPlatform platform, AUser aUser) {
@@ -20,6 +24,8 @@ public class TStatistics extends AStatistics {
     }
 
     public void sendPlayerTime() {
+        super.getPlatform().log(INFO, "Sending playertime to API");
+
         String definitionID = checkDefinition();
 
         if (definitionID != null) {
@@ -41,11 +47,17 @@ public class TStatistics extends AStatistics {
                         put("value", hours);
                     }};
 
+                    Response response = null;
                     try {
-                        super.getPlatform().getApiClient().sendPlayerTime(Utility.createRequestBody(values)).execute();
+                        response = super.getPlatform().getApiClient().sendPlayerTime(Utility.createRequestBody(values)).execute();
                     } catch (IOException e) {
                         super.getPlatform().log(Level.SEVERE, "Failed to send player time to VyHub API" + e.getMessage());
                     }
+
+                    if (!checkResponse(getPlatform(), response, "Send playtime statistic to API")) {
+                        continue;
+                    }
+
                     resetPlayerTime(playerID);
                 }
             }

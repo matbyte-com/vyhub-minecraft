@@ -12,12 +12,16 @@ public abstract class AServer {
     private static Cache<Server> serverCache = new Cache<>("server", Server.class);
     public static String serverbundleID = null;
 
-    public final VyHubPlatform platform;
+    private final VyHubPlatform platform;
     private final AUser aUser;
 
     public AServer(VyHubPlatform platform, AUser aUser) {
         this.platform = platform;
         this.aUser = aUser;
+    }
+
+    public VyHubPlatform getPlatform() {
+        return platform;
     }
 
     public AUser getAUser() {

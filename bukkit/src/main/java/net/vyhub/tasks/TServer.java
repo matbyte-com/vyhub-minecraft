@@ -8,12 +8,15 @@ import net.vyhub.entity.VyHubUser;
 import net.vyhub.lib.Utility;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import retrofit2.Response;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static net.vyhub.lib.Utility.checkResponse;
 
 public class TServer extends AServer {
     public TServer(VyHubPlatform platform, AUser aUser) {
@@ -46,10 +49,13 @@ public class TServer extends AServer {
             put("is_alive", "true");
         }};
 
+        Response response = null;
         try {
-            super.platform.getApiClient().patchServer(VyHubConfiguration.getServerId(), Utility.createRequestBody(values)).execute();
+            response = getPlatform().getApiClient().patchServer(VyHubConfiguration.getServerId(), Utility.createRequestBody(values)).execute();
         } catch (IOException e) {
             return;
         }
+
+        checkResponse(getPlatform(), response, "Patch server");
     }
 }

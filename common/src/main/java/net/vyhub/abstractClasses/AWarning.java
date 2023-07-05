@@ -78,7 +78,7 @@ public abstract class AWarning {
             platform.log(INFO, String.format("§c[WARN] §9Warned user %s:§6 %s", playerName, reason));
 
             if (adminPlayerId != null) {
-                aUser.sendMessage(adminPlayerName, String.format(platform.getI18n().get("warningUnsuccessful"), playerName, reason));
+                aUser.sendMessage(adminPlayerName, String.format(platform.getI18n().get("warningSuccessful"), playerName, reason));
             }
         }
     }

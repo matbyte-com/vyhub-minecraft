@@ -7,6 +7,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Cache;
 import org.json.JSONObject;
+import retrofit2.Response;
 
 import java.io.File;
 import java.net.ProxySelector;
@@ -30,5 +31,13 @@ public class Utility {
                 .writeTimeout(7, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS)
                 .proxySelector(ProxySelector.getDefault());
+    }
+
+    public static Boolean checkResponse(VyHubPlatform platform, Response response, String action) {
+        if (!response.isSuccessful()) {
+            platform.log(SEVERE, String.format("[API Error] Failed to %s: %s", action, response.message()));
+            return false;
+        }
+        return true;
     }
 }

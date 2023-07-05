@@ -40,7 +40,9 @@ public interface VyHubAPI {
 
                                 return chain.proceed(request);
                             }
-                        }).build())
+                        })
+                        .followRedirects(true)
+                        .build())
                 .build().create(VyHubAPI.class);
     }
 
@@ -68,7 +70,7 @@ public interface VyHubAPI {
     @POST("user/attribute/definition")
     public Call<Definition> createPlaytimeDefinition(@Body RequestBody body);
 
-    @POST("user/attribute")
+    @POST("user/attribute/")
     public Call<Object> sendPlayerTime(@Body RequestBody body);
 
     @POST("warning/")
