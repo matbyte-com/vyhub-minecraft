@@ -71,8 +71,11 @@ public interface VyHubAPI {
     @POST("user/attribute")
     public Call<Object> sendPlayerTime(@Body RequestBody body);
 
-    @POST("warning")
+    @POST("warning/")
     public Call<Warn> createWarning(@Query("morph_user_id") String admin_id, @Body RequestBody body);
+
+    @POST("warning/")
+    public Call<Warn> createWarningWithoutCreator(@Body RequestBody body);
 
     @GET("server/bundle/{serverbundle_id}/ban?active=true")
     public Call<Map<String, List<Ban>>> getBans(@Path("serverbundle_id") String serverbundle_id);

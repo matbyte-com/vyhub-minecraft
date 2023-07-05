@@ -5,6 +5,7 @@ import net.vyhub.abstractClasses.ABans;
 import net.vyhub.abstractClasses.AUser;
 import net.vyhub.abstractClasses.AWarning;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -19,14 +20,14 @@ public class Warn extends AWarning implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        Player player = null;
+        Player processor;
 
         if (sender instanceof ConsoleCommandSender) {
-
+            processor = null;
         } else if (sender instanceof Player) {
-            player = (Player) sender;
+            processor = (Player) sender;
         } else {
-            return false;
+            processor = null;
         }
 
         if (args.length == 0) {
@@ -37,16 +38,17 @@ public class Warn extends AWarning implements CommandExecutor {
         Player p = Bukkit.getPlayer(args[0]);
 
         if (p != null) {
-            Player finalPlayer = player;
-
             getPlatform().executeAsync(() -> {
-                createWarning(p.getUniqueId().toString(), p.getName(), args[1], finalPlayer.getUniqueId().toString(), finalPlayer.getName());
+                String processorId = processor!= null ? processor.getUniqueId().toString() : null;
+                String processorName = processor!= null ? processor.getName() : null;
+                createWarning(p.getUniqueId().toString(), p.getName(), args[1], processorId, processorName);
                 aBans.syncBans();
             });
 
             return true;
         }
 
+        sender.sendMessage(ChatColor.DARK_RED + getPlatform().getI18n().get("playerMustBeOnline"));
         return false;
     }
 }

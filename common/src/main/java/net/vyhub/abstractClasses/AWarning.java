@@ -1,5 +1,6 @@
 package net.vyhub.abstractClasses;
 
+import net.vyhub.VyHubAPI;
 import net.vyhub.VyHubPlatform;
 import net.vyhub.entity.VyHubUser;
 import net.vyhub.entity.Warn;
@@ -44,12 +45,14 @@ public abstract class AWarning {
         String adminUserID = "";
         if (adminPlayerId != null) {
             VyHubUser vyHubAdminUser = aUser.getUser(adminPlayerId);
-            adminUserID = "?morph_user_id=" + vyHubAdminUser.getId();
+            adminUserID = vyHubAdminUser.getId();
         }
 
         Response<Warn> response;
         try {
-            response = platform.getApiClient().createWarning(adminUserID, Utility.createRequestBody(values)).execute();
+            VyHubAPI apiClient = platform.getApiClient();
+            if (adminPlayerId == null) response = apiClient.createWarningWithoutCreator(Utility.createRequestBody(values)).execute();
+            else response = apiClient.createWarning(adminUserID, Utility.createRequestBody(values)).execute();
         } catch (IOException e) {
             platform.log(SEVERE, "Failed to create warning in VyHub API" + e.getMessage());
             return;
