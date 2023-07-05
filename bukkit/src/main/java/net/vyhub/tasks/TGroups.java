@@ -25,6 +25,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
+import java.util.logging.Level;
 
 public class TGroups extends AGroups implements Listener {
     public TGroups(VyHubPlatform platform, AUser aUser) {
@@ -97,8 +99,12 @@ public class TGroups extends AGroups implements Listener {
         });
     }
 
-    public void addPlayerToLuckpermsGroup(List<String> allGroups, String playerId) {
+    public void addPlayerToLuckpermsGroup(List<String> allGroups, UUID playerId) {
         Player player = Bukkit.getPlayer(playerId);
+        if (player == null) {
+            getPlatform().log(Level.WARNING, "Group-Sync: Player with could not be found on server");
+            return;
+        }
         RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
         if (provider != null) {
             LuckPerms api = provider.getProvider();

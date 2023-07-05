@@ -9,12 +9,10 @@ import net.vyhub.lib.Utility;
 import retrofit2.Response;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.logging.Level.*;
+import static net.vyhub.lib.Utility.checkResponse;
 
 public abstract class AGroups {
     private static List<Group> groups;
@@ -43,9 +41,10 @@ public abstract class AGroups {
             response = platform.getApiClient().getGroups().execute();
         } catch (IOException e) {
             platform.log(SEVERE, "Failed to fetch groups from VyHub API: " + e.getMessage());
+            return;
         }
 
-        if (response == null || response.code() != 200) {
+        if (!checkResponse(getPlatform(), response, "Fetch Groups")) {
             return;
         }
 
@@ -80,9 +79,7 @@ public abstract class AGroups {
             platform.log(SEVERE, "Failed to fetch memberships from VyHub API: " + e.getMessage());
         }
 
-        if (response == null || response.code() != 200) {
-            return;
-        }
+        checkResponse(getPlatform(), response, "Fetch Memberships");
 
         List<Group> vyhubGroups = response.body();
         List<String> allGroups = new ArrayList<>();
@@ -94,25 +91,12 @@ public abstract class AGroups {
             allGroups.add(group.getName());
         });
 
-        // TODO Thats the old implementation, is replaced through the one above
-        /*
-        for (int i = 0; i < jsonArray.size(); i++) {
-            JSONObject jsonObject = (JSONObject) jsonArray.get(i);
-            JSONArray mappings = (JSONArray) jsonObject.get("mappings");
-            for (int j = 0; j < mappings.size(); j++) {
-                JSONObject groupParameters = (JSONObject) mappings.get(j);
-                String groupName = groupParameters.get("name").toString();
-                allGroups.add(groupName);
-            }
-        }*/
-
-
         platform.executeAsync(() -> {
-            addPlayerToLuckpermsGroup(allGroups, playerId);
+            addPlayerToLuckpermsGroup(allGroups, user.getIdentifier());
         });
     }
 
-    public abstract void addPlayerToLuckpermsGroup(List<String> allGroups, String playerId);
+    public abstract void addPlayerToLuckpermsGroup(List<String> allGroups, UUID playerId);
 
 
     public void addUserToVyHubGroup(VyHubUser user, String groupName) {

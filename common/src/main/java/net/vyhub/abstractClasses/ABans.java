@@ -86,9 +86,6 @@ public abstract class ABans {
             return;
         }
 
-        // TODO No Idea what this does
-        // Type vyhubBansType = new TypeToken<Map<String, List<Ban>>>() {}.getType();
-        // vyhubBans = gson.fromJson(response.body(), vyhubBansType);
         vyhubBans = response.body();
     }
 

@@ -29,7 +29,6 @@ public class TRewards extends ARewards implements Listener {
     @EventHandler
     public void onPlayerInit(VyHubPlayerInitializedEvent event) {
         Player player = event.getPlayer();
-
         getPlatform().executeAsync(() -> {
             getPlayerReward(player);
 

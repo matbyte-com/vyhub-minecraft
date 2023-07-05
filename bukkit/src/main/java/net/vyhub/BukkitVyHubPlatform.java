@@ -3,6 +3,7 @@ package net.vyhub;
 import net.vyhub.config.I18n;
 import net.vyhub.config.VyHubConfiguration;
 import org.bukkit.Bukkit;
+import org.bukkit.event.Event;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -54,6 +55,7 @@ public class BukkitVyHubPlatform implements VyHubPlatform {
 
     @Override
     public void callEvent(Object event) {
-
+        Event bukkitEvent = (Event) event;
+        executeBlocking(() -> plugin.getServer().getPluginManager().callEvent(bukkitEvent));
     }
 }

@@ -3,6 +3,7 @@ package net.vyhub.entity;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public class VyHubUser {
 
@@ -50,8 +51,8 @@ public class VyHubUser {
         this.type = type;
     }
 
-    public String getIdentifier() {
-        return identifier;
+    public UUID getIdentifier() {
+        return UUID.fromString(identifier);
     }
 
     public void setIdentifier(String identifier) {

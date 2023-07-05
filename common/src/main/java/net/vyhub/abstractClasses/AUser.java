@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import static java.util.logging.Level.INFO;
+import static net.vyhub.lib.Utility.checkResponse;
 
 public abstract class AUser {
     public static Map<String, VyHubUser> vyHubPlayers = new HashMap<>();
@@ -37,7 +38,6 @@ public abstract class AUser {
 
             platform.executeAsyncLater(() -> checkPlayerExists(playerId, playerName), 1, TimeUnit.MINUTES);
         } else {
-            // TODO Check how the event call is working
             platform.executeAsync(() -> callVyHubPlayerInitializedEvent(playerId, playerName));
         }
     };
@@ -84,10 +84,13 @@ public abstract class AUser {
 
         Response<VyHubUser> response;
         try {
-            // TODO Does this response returns a List?
             response = platform.getApiClient().getUser(UUID).execute();
         } catch (IOException e) {
             platform.log(Level.SEVERE, "Failed to get user from VyHub API" + e.getMessage());
+            return null;
+        }
+
+        if (!checkResponse(getPlatform(), response, "Fetch User")) {
             return null;
         }
 
