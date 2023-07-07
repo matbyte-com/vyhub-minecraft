@@ -135,6 +135,13 @@ public class TGroups extends AGroups implements Listener {
             api.getUserManager().saveUser(user);
         }
     }
+
+    @Override
+    public void syncGroupsForAll() {
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            syncGroups(player.getUniqueId().toString());
+        });
+    }
 }
 
 

@@ -63,6 +63,7 @@ public abstract class AGroups {
         mappedGroups = new HashMap<>(newMappedGroups);
     }
 
+    public abstract void syncGroupsForAll();
 
     public void syncGroups(String playerId) {
         VyHubUser user = aUser.getUser(playerId);
