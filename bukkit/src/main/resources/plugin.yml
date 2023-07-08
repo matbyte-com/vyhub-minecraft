@@ -4,7 +4,7 @@ description: 'VyHub plugin to manage and monetize your Minecraft server. You can
 main: net.vyhub.VyHubPlugin
 api-version: 1.13
 
-depend:
+softdepend:
   - LuckPerms
 commands:
   login:

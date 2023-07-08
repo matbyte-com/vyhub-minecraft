@@ -137,6 +137,25 @@ public class TGroups extends AGroups implements Listener {
     }
 
     @Override
+    public List<String> getGroupsForPlayer(String playerId) {
+        RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+        if (provider != null) {
+            LuckPerms api = provider.getProvider();
+            User user = api.getUserManager().getUser(UUID.fromString(playerId));
+            if (user == null) {
+                return new ArrayList<>();
+            }
+            Collection<InheritanceNode> currentNodes = user.getNodes(NodeType.INHERITANCE);
+            List<String> res = new ArrayList<>();
+            for (InheritanceNode n : currentNodes) {
+                res.add(n.getGroupName());
+            }
+            return res;
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
     public void syncGroupsForAll() {
         Bukkit.getOnlinePlayers().forEach(player -> {
             syncGroups(player.getUniqueId().toString());

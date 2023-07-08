@@ -16,6 +16,7 @@ import net.vyhub.tasks.*;
 import okhttp3.OkHttpClient;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import retrofit2.Response;
@@ -66,12 +67,12 @@ public class VyHubPlugin extends JavaPlugin {
         platform = new BukkitVyHubPlatform(this);
         // Load Command and Task classes
         tUser = new TUser(this.platform);
-        ban = new Ban(this.platform, this.tUser);
         config = new Config(this);
         login = new Login(this);
         warn = new Warn(this.platform, this.ban, this.tUser);
         tAdvert = new TAdvert(this.platform);
         tGroups = new TGroups(this.platform, this.tUser);
+        ban = new Ban(this.platform, this.tUser, this.tGroups);
         tServer = new TServer(this.platform, this.tUser);
         tRewards = new TRewards(this.platform, this.tUser);
         tStatistics = new TStatistics(this.platform, this.tUser);
@@ -125,6 +126,11 @@ public class VyHubPlugin extends JavaPlugin {
         pluginManager.registerEvents(tUser, plugin);
         pluginManager.registerEvents(tGroups, plugin);
         pluginManager.registerEvents(tRewards, plugin);
+
+        if (Bukkit.getServicesManager().getRegistration(LuckPerms.class) == null) {
+            this.platform.log(INFO, "LuckPerms not found. Disabling group sync");
+            return;
+        }
 
         LuckPerms luckPerms = LuckPermsProvider.get();
         EventBus eventBus = luckPerms.getEventBus();
