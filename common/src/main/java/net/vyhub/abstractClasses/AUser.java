@@ -90,8 +90,14 @@ public abstract class AUser {
             return null;
         }
 
-        if (!checkResponse(getPlatform(), response, "Fetch User")) {
-            return null;
+        if (response.isSuccessful()) {
+            VyHubUser vyHubUser = response.body();
+
+            if (vyHubUser != null) {
+                vyHubPlayers.put(UUID, vyHubUser);
+            }
+
+            return vyHubUser;
         }
 
         if (create) {
