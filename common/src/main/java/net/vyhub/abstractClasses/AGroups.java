@@ -167,8 +167,8 @@ public abstract class AGroups {
     public boolean checkProperty(String playerId, String property) {
         List<String> playerGroups = getGroupsForPlayer(playerId);
         for (String group : playerGroups) {
-            List<Property> properties = mappedGroups.get(group).getProperties();
-            for (Property prop : properties) {
+            Map<String, Property> properties = mappedGroups.get(group).getProperties();
+            for (Property prop : properties.values()) {
                 if (prop.getName().equals(property) && prop.isGranted()) {
                     return true;
                 }

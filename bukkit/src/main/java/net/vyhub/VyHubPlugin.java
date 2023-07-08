@@ -71,7 +71,6 @@ public class VyHubPlugin extends JavaPlugin {
         login = new Login(this);
         warn = new Warn(this.platform, this.ban, this.tUser);
         tAdvert = new TAdvert(this.platform);
-        tGroups = new TGroups(this.platform, this.tUser);
         ban = new Ban(this.platform, this.tUser, this.tGroups);
         tServer = new TServer(this.platform, this.tUser);
         tRewards = new TRewards(this.platform, this.tUser);
@@ -86,8 +85,13 @@ public class VyHubPlugin extends JavaPlugin {
 
 
         // Plugin startup logic
-        this.luckPerms = getServer().getServicesManager().load(LuckPerms.class);
-        new PlayerGivenPermissionListener(this, this.luckPerms).register();
+        if (luckPermsInstalled()) {
+            tGroups = new TGroups(this.platform, this.tUser);
+            this.luckPerms = getServer().getServicesManager().load(LuckPerms.class);
+            new PlayerGivenPermissionListener(this, this.luckPerms).register();
+        } else {
+            this.platform.log(INFO, "LuckPerms not found. Disabling group sync");
+        }
 
         plugin.getCommand("vh_config").setExecutor(config);
         plugin.getCommand("vh_setup").setExecutor(config);
@@ -109,8 +113,6 @@ public class VyHubPlugin extends JavaPlugin {
         TRewards.loadExecuted();
 
         scheduler.runTaskTimerAsynchronously(plugin, tServer::patchServer, 20L * 1L, 20L * 60L);
-        scheduler.runTaskTimerAsynchronously(plugin, tGroups::updateGroups, 20L * 1L, 20L * 60L); // *5L
-        scheduler.runTaskTimerAsynchronously(plugin, tGroups::syncGroupsForAll, 20L * 60L, 20L * 60L); // *10L und *8L
         scheduler.runTaskTimerAsynchronously(plugin, ban::syncBans, 20L * 1L, 20L * 60L);
         scheduler.runTaskTimerAsynchronously(plugin, tStatistics::playerTime, 20L * 1L, 20L * 60L);
         scheduler.runTaskTimerAsynchronously(plugin, tRewards::getRewards, 20L * 5L, 20L * 60L);
@@ -118,19 +120,24 @@ public class VyHubPlugin extends JavaPlugin {
         scheduler.runTaskTimerAsynchronously(plugin, tStatistics::sendPlayerTime, 20L * 5L, 20L * 60L); // *30L
         scheduler.runTaskTimerAsynchronously(plugin, tAdvert::loadAdverts, 20L * 1L, 20L * 60L * 5L);
         scheduler.runTaskTimerAsynchronously(plugin, tAdvert::nextAdvert, 20L * 5L, 20L * Integer.parseInt(VyHubConfiguration.getAdvertInterval()));
+
+        if (luckPermsInstalled()) {
+            scheduler.runTaskTimerAsynchronously(plugin, tGroups::updateGroups, 20L * 1L, 20L * 60L); // *5L
+            scheduler.runTaskTimerAsynchronously(plugin, tGroups::syncGroupsForAll, 20L * 60L, 20L * 60L); // *10L und *8L
+        }
     }
 
 
     private void listenerRegistration() {
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(tUser, plugin);
-        pluginManager.registerEvents(tGroups, plugin);
         pluginManager.registerEvents(tRewards, plugin);
 
-        if (Bukkit.getServicesManager().getRegistration(LuckPerms.class) == null) {
-            this.platform.log(INFO, "LuckPerms not found. Disabling group sync");
+        if (!luckPermsInstalled()) {
             return;
         }
+
+        pluginManager.registerEvents(tGroups, plugin);
 
         LuckPerms luckPerms = LuckPermsProvider.get();
         EventBus eventBus = luckPerms.getEventBus();
@@ -186,4 +193,7 @@ public class VyHubPlugin extends JavaPlugin {
         this.onReady();
     }
 
+    public boolean luckPermsInstalled() {
+        return Bukkit.getPluginManager().isPluginEnabled("LuckPerms");
+    }
 }
