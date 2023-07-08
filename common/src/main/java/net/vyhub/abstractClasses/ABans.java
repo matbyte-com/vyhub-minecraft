@@ -34,14 +34,19 @@ public abstract class ABans {
 
     private final VyHubPlatform platform;
     private final AUser aUser;
+    private final AGroups aGroups;
 
-    public ABans(VyHubPlatform platform, AUser aUser) {
+    public ABans(VyHubPlatform platform, AUser aUser, AGroups aGroups) {
         this.platform = platform;
         this.aUser = aUser;
+        this.aGroups = aGroups;
     }
 
     public VyHubPlatform getPlatform() {
         return platform;
+    }
+    public AGroups getAGroups() {
+        return aGroups;
     }
 
     private static Cache<Set<String>> banCache = new Cache<>(

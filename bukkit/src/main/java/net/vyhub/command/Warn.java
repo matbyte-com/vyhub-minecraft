@@ -42,7 +42,6 @@ public class Warn extends AWarning implements CommandExecutor {
                 String processorId = processor!= null ? processor.getUniqueId().toString() : null;
                 String processorName = processor!= null ? processor.getName() : null;
                 createWarning(p.getUniqueId().toString(), p.getName(), args[1], processorId, processorName);
-                aBans.syncBans();
             });
 
             return true;

@@ -80,6 +80,8 @@ public abstract class AWarning {
             if (adminPlayerId != null) {
                 aUser.sendMessage(adminPlayerName, String.format(platform.getI18n().get("warningSuccessful"), playerName, reason));
             }
+
+            aBans.syncBans();
         }
     }
 }

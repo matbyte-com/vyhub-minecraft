@@ -1,10 +1,7 @@
 package net.vyhub.abstractClasses;
 
 import net.vyhub.VyHubPlatform;
-import net.vyhub.entity.Group;
-import net.vyhub.entity.GroupMapping;
-import net.vyhub.entity.Membership;
-import net.vyhub.entity.VyHubUser;
+import net.vyhub.entity.*;
 import net.vyhub.lib.Utility;
 import retrofit2.Response;
 
@@ -163,5 +160,20 @@ public abstract class AGroups {
 
     public static String getBacklogKey(String playerID, String groupName, String operation) {
         return String.format("%s_%s_%s", playerID, operation.toUpperCase(), groupName);
+    }
+
+    public abstract List<String> getGroupsForPlayer(String playerId);
+
+    public boolean checkProperty(String playerId, String property) {
+        List<String> playerGroups = getGroupsForPlayer(playerId);
+        for (String group : playerGroups) {
+            List<Property> properties = mappedGroups.get(group).getProperties();
+            for (Property prop : properties) {
+                if (prop.getName().equals(property) && prop.isGranted()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

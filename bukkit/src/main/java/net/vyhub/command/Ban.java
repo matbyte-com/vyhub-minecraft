@@ -2,12 +2,14 @@ package net.vyhub.command;
 
 import net.vyhub.VyHubPlatform;
 import net.vyhub.abstractClasses.ABans;
+import net.vyhub.abstractClasses.AGroups;
 import net.vyhub.abstractClasses.AUser;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import java.time.ZonedDateTime;
@@ -16,8 +18,8 @@ import java.util.Date;
 import java.util.UUID;
 
 public class Ban extends ABans implements CommandExecutor {
-    public Ban(VyHubPlatform platform, AUser aUser) {
-        super(platform, aUser);
+    public Ban(VyHubPlatform platform, AUser aUser, AGroups aGroups) {
+        super(platform, aUser, aGroups);
     }
 
     @Override
@@ -49,7 +51,16 @@ public class Ban extends ABans implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender.isOp()) {
+        Player processor;
+        if (sender instanceof ConsoleCommandSender) {
+            processor = null;
+        } else if (sender instanceof Player) {
+            processor = (Player) sender;
+        } else {
+            processor = null;
+        }
+
+        if (sender.isOp() || getAGroups().checkProperty(processor.getUniqueId().toString(), "ban_edit")) {
             if (args.length == 0) {
                 return false;
             }
@@ -77,6 +88,7 @@ public class Ban extends ABans implements CommandExecutor {
             }
             return true;
         }
+        sender.sendMessage(getPlatform().getI18n().get("noPermission"));
         return true;
     }
 }

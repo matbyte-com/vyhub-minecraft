@@ -8,7 +8,7 @@ public class Group {
     String name;
     int permission_level;
     String color;
-    Map<String, Property> properties;
+    List<Property> properties;
     boolean is_team;
     List<GroupMapping> mappings;
 
@@ -45,11 +45,11 @@ public class Group {
         this.color = color;
     }
 
-    public Map<String, Property> getProperties() {
+    public List<Property> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, Property> properties) {
+    public void setProperties(List<Property> properties) {
         this.properties = properties;
     }
 
