@@ -55,7 +55,7 @@ public abstract class ARewards {
 
     public abstract List<String> getOnlinePlayerIds();
 
-    public void getRewardsFromApi() {
+    public void fetchRewards() {
         StringBuilder stringBuilder = new StringBuilder();
 
         for (String playerId : getOnlinePlayerIds()) {

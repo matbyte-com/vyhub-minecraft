@@ -107,7 +107,7 @@ public interface VyHubAPI {
     public Call<Membership> deleteAllMemberships(@Path("user_id") String user_id, @Query("serverbundle_id") String serverbundle_id);
 
     @GET("packet/reward/applied/user?active=true&foreign_ids=true&status=OPEN")
-    public Call<Map<String, List<AppliedReward>>>  getRewards(@Query("serverbundle_id") String serverbundle_id, @Query("server_id") String server_id, @Query("user_ids") String user_ids);
+    public Call<Map<String, List<AppliedReward>>>  getRewards(@Query("serverbundle_id") String serverbundle_id, @Query("for_server_id") String server_id, @Query("user_ids") String user_ids);
 
     @PATCH("packet/reward/applied/{reward_id}")
     public Call<AppliedReward> sendExecutedRewards(@Path("reward_id") String reward_id, @Body RequestBody body);

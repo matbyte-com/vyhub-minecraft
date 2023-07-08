@@ -115,7 +115,7 @@ public class VyHubPlugin extends JavaPlugin {
         scheduler.runTaskTimerAsynchronously(plugin, tServer::patchServer, 20L * 1L, 20L * 60L);
         scheduler.runTaskTimerAsynchronously(plugin, ban::syncBans, 20L * 1L, 20L * 60L);
         scheduler.runTaskTimerAsynchronously(plugin, tStatistics::playerTime, 20L * 1L, 20L * 60L);
-        scheduler.runTaskTimerAsynchronously(plugin, tRewards::getRewards, 20L * 5L, 20L * 60L);
+        scheduler.runTaskTimerAsynchronously(plugin, tRewards::fetchRewards, 20L * 5L, 20L * 60L);
         scheduler.runTaskTimer(plugin, tRewards::runDirectRewards, 20L * 1L, 20L * 60L);
         scheduler.runTaskTimerAsynchronously(plugin, tStatistics::sendPlayerTime, 20L * 5L, 20L * 60L); // *30L
         scheduler.runTaskTimerAsynchronously(plugin, tAdvert::loadAdverts, 20L * 1L, 20L * 60L * 5L);

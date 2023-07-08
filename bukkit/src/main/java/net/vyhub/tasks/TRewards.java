@@ -74,7 +74,13 @@ public class TRewards extends ARewards implements Listener {
             String _playerID = entry.getKey();
             List<AppliedReward> appliedRewards = entry.getValue();
 
-            Player player = Bukkit.getPlayer(UUID.fromString(_playerID));
+            Player player = null;
+            try {
+                player = Bukkit.getPlayer(UUID.fromString(_playerID));
+            } catch (IllegalArgumentException e) {
+                getPlatform().log(WARNING, "Error while executing rewards: PlayerID: " + _playerID + " is not a valid UUID");
+                continue;
+            }
 
             if (player == null) {
                 continue;
