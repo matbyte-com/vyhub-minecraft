@@ -39,9 +39,10 @@ public class Warn extends AWarning implements CommandExecutor {
 
         if (p != null) {
             getPlatform().executeAsync(() -> {
+                String reason = args.length == 2 ? args[1] : null;
                 String processorId = processor!= null ? processor.getUniqueId().toString() : null;
                 String processorName = processor!= null ? processor.getName() : null;
-                createWarning(p.getUniqueId().toString(), p.getName(), args[1], processorId, processorName);
+                createWarning(p.getUniqueId().toString(), p.getName(), reason, processorId, processorName);
             });
 
             return true;

@@ -6,6 +6,7 @@ import net.vyhub.abstractClasses.AGroups;
 import net.vyhub.abstractClasses.AUser;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -60,7 +61,7 @@ public class Ban extends ABans implements CommandExecutor {
             processor = null;
         }
 
-        if (sender.isOp() || getAGroups().checkProperty(processor.getUniqueId().toString(), "ban_edit")) {
+        if (sender.isOp() || (getAGroups() != null && getAGroups().checkProperty(processor.getUniqueId().toString(), "ban_edit"))) {
             if (args.length == 0) {
                 return false;
             }
@@ -81,14 +82,15 @@ public class Ban extends ABans implements CommandExecutor {
                     return false;
                 }
 
-                p.kickPlayer(String.format(getPlatform().getI18n().get("youGotTimeBanned"), minutes, args[2]));
-                Bukkit.getBanList(BanList.Type.NAME).addBan(p.getUniqueId().toString(), args[2], new Date(Calendar.getInstance().getTimeInMillis() + (minutes * 60 * 1000)), sender.getName());
+                String reason = args.length == 3 ? args[2] : null;
+                p.kickPlayer(String.format(getPlatform().getI18n().get("youGotTimeBanned"), minutes, reason));
+                Bukkit.getBanList(BanList.Type.NAME).addBan(p.getUniqueId().toString(), reason, new Date(Calendar.getInstance().getTimeInMillis() + (minutes * 60 * 1000)), sender.getName());
             } else {
                 sender.sendMessage(getPlatform().getI18n().get("playerMustBeOnline"));
             }
             return true;
         }
-        sender.sendMessage(getPlatform().getI18n().get("noPermission"));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', getPlatform().getI18n().get("banNoPermissions")));
         return true;
     }
 }

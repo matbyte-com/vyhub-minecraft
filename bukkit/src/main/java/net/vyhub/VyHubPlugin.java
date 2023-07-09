@@ -71,7 +71,6 @@ public class VyHubPlugin extends JavaPlugin {
         login = new Login(this);
         warn = new Warn(this.platform, this.ban, this.tUser);
         tAdvert = new TAdvert(this.platform);
-        ban = new Ban(this.platform, this.tUser, this.tGroups);
         tServer = new TServer(this.platform, this.tUser);
         tRewards = new TRewards(this.platform, this.tUser);
         tStatistics = new TStatistics(this.platform, this.tUser);
@@ -92,6 +91,9 @@ public class VyHubPlugin extends JavaPlugin {
         } else {
             this.platform.log(INFO, "LuckPerms not found. Disabling group sync");
         }
+
+        ban = new Ban(this.platform, this.tUser, this.tGroups);
+
 
         plugin.getCommand("vh_config").setExecutor(config);
         plugin.getCommand("vh_setup").setExecutor(config);
