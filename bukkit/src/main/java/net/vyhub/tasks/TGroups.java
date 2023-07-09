@@ -14,13 +14,12 @@ import net.vyhub.abstractClasses.AGroups;
 import net.vyhub.abstractClasses.AUser;
 import net.vyhub.entity.VyHubUser;
 import net.vyhub.event.VyHubPlayerInitializedEvent;
-import net.vyhub.lib.Utility;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -121,6 +120,7 @@ public class TGroups extends AGroups implements Listener {
                     if (!currentNodes.contains(node)) {
                         groupChangeBacklog.add(getBacklogKey(playerID, groupName, "add"));
                         user.data().add(node);
+                        player.sendMessage(ChatColor.YELLOW + String.format(getPlatform().getI18n().get("groupAdded"), groupName));
                     }
                 }
             }
@@ -128,8 +128,10 @@ public class TGroups extends AGroups implements Listener {
             for (InheritanceNode n : currentNodes) {
                 // Only remove group if there is a mapping for it. Otherwise, let it there
                 if (!nodes.contains(n) && getMappedGroups().containsKey(n.getGroupName())) {
-                    groupChangeBacklog.add(getBacklogKey(playerID, n.getGroupName(), "remove"));
+                    String groupName = n.getGroupName();
+                    groupChangeBacklog.add(getBacklogKey(playerID, groupName, "remove"));
                     user.data().remove(n);
+                    player.sendMessage(ChatColor.YELLOW + String.format(getPlatform().getI18n().get("groupRemoved"), groupName));
                 }
             }
             api.getUserManager().saveUser(user);

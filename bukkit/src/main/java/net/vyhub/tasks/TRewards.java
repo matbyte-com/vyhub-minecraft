@@ -4,7 +4,6 @@ import net.vyhub.VyHubPlatform;
 import net.vyhub.abstractClasses.ARewards;
 import net.vyhub.abstractClasses.AUser;
 import net.vyhub.entity.AppliedReward;
-import net.vyhub.entity.Reward;
 import net.vyhub.event.VyHubPlayerInitializedEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -16,9 +15,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-
-import static java.util.logging.Level.INFO;
-import static java.util.logging.Level.WARNING;
+import java.util.logging.Level;
 
 public class TRewards extends ARewards implements Listener {
 
@@ -47,75 +44,6 @@ public class TRewards extends ARewards implements Listener {
 
     }
 
-    public synchronized void executeReward(List<String> events, String playerID) {
-        if (getRewards() == null) {
-            return;
-        }
-
-        Map<String, List<AppliedReward>> rewardsByPlayer = new HashMap<>(getRewards());
-
-        if (playerID == null) {
-            for (String event : events) {
-                if (!event.equals("DIRECT") && !event.equals("DISABLE")) {
-                    throw new RuntimeException();
-                }
-            }
-        } else {
-            rewardsByPlayer.clear();
-
-            if (getRewards().containsKey(playerID)) {
-                rewardsByPlayer.put(playerID, getRewards().get(playerID));
-            } else {
-                return;
-            }
-        }
-
-        for (Map.Entry<String, List<AppliedReward>> entry : rewardsByPlayer.entrySet()) {
-            String _playerID = entry.getKey();
-            List<AppliedReward> appliedRewards = entry.getValue();
-
-            Player player = null;
-            try {
-                player = Bukkit.getPlayer(UUID.fromString(_playerID));
-            } catch (IllegalArgumentException e) {
-                getPlatform().log(WARNING, "Error while executing rewards: PlayerID: " + _playerID + " is not a valid UUID");
-                continue;
-            }
-
-            if (player == null) {
-                continue;
-            }
-
-            for (AppliedReward appliedReward : appliedRewards) {
-                if (getExecutedRewards().contains(appliedReward.getId()) || getExecutedAndSentRewards().contains(appliedReward.getId())) {
-                    continue;
-                }
-
-                Reward reward = appliedReward.getReward();
-                if (events.contains(reward.getOn_event())) {
-                    Map<String, String> data = reward.getData();
-                    boolean success = true;
-                    if (reward.getType().equals("COMMAND")) {
-                        String command = data.get("command");
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), stringReplace(command, player, appliedReward));
-                    } else {
-                        success = false;
-
-                        getPlatform().log(WARNING, "No implementation for Reward Type: " + reward.getType());
-                    }
-                    if (reward.getOnce()) {
-                        setExecuted(appliedReward.getId());
-                    }
-                    if (success) {
-                        getPlatform().log(INFO, "RewardName: " + appliedReward.getReward().getName() + " Type: " +
-                                appliedReward.getReward().getType() + " Player: " + player.getName() + " executed!");
-                    }
-                }
-            }
-        }
-
-        getPlatform().executeAsync(this::sendExecuted);
-    }
 
 
     @EventHandler
@@ -150,7 +78,12 @@ public class TRewards extends ARewards implements Listener {
         executeReward(eventList, player.getUniqueId().toString());
     }
 
-    public String stringReplace(String command, Player player, AppliedReward appliedReward) {
+    public String stringReplace(String command, Object playerObject, AppliedReward appliedReward) {
+        if (!(playerObject instanceof Player)) {
+            getPlatform().log(Level.SEVERE, "Player object is not a player instance.");
+            return null;
+        }
+        Player player = (Player) playerObject;
         String newString = command;
         newString = newString.replace("%nick%", player.getName());
         newString = newString.replace("%user_id%", getAUser().getUser(player.getUniqueId().toString()).getId());
@@ -178,5 +111,23 @@ public class TRewards extends ARewards implements Listener {
         }
 
         return playerIds;
+    }
+
+    public void dispatchCommand(String command) {
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+    }
+
+    public Object getPlayer(String playerId) {
+        return Bukkit.getPlayer(UUID.fromString(playerId));
+    }
+
+    @Override
+    public String getPlayerName(Object playerObject) {
+        if (!(playerObject instanceof Player)) {
+            getPlatform().log(Level.SEVERE, "Player object is not a player instance.");
+            return null;
+        }
+        Player player = (Player) playerObject;
+        return player.getName();
     }
 }

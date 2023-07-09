@@ -13,34 +13,26 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import static java.util.logging.Level.INFO;
-import static net.vyhub.lib.Utility.checkResponse;
 
-public abstract class AUser {
+public abstract class AUser extends SuperClass {
     public static Map<String, VyHubUser> vyHubPlayers = new HashMap<>();
-
-    private final VyHubPlatform platform;
-
     private static Semaphore userCreateSem = new Semaphore(1, true);
 
     public AUser(VyHubPlatform platform) {
-        this.platform = platform;
-    }
-
-    public VyHubPlatform getPlatform() {
-        return platform;
+        super(platform);
     }
 
     public void checkPlayerExists(String playerId, String playerName) {
         VyHubUser user = getUser(playerId);
 
         if (user == null) {
-            platform.log(Level.WARNING, String.format("Could not register player %s, trying again in a minute..", playerName));
+            getPlatform().log(Level.WARNING, String.format("Could not register player %s, trying again in a minute..", playerName));
 
-            platform.executeAsyncLater(() -> checkPlayerExists(playerId, playerName), 1, TimeUnit.MINUTES);
+            getPlatform().executeAsyncLater(() -> checkPlayerExists(playerId, playerName), 1, TimeUnit.MINUTES);
         } else {
-            platform.executeAsync(() -> callVyHubPlayerInitializedEvent(playerId, playerName));
+            getPlatform().executeAsync(() -> callVyHubPlayerInitializedEvent(playerId, playerName));
         }
-    };
+    }
 
     public abstract void callVyHubPlayerInitializedEvent(String playerId, String playerName);
 
@@ -54,9 +46,9 @@ public abstract class AUser {
 
         Response<VyHubUser> response;
         try {
-            response = platform.getApiClient().createUser(Utility.createRequestBody(values)).execute();
+            response = getPlatform().getApiClient().createUser(Utility.createRequestBody(values)).execute();
         } catch (IOException e) {
-            platform.log(Level.SEVERE, "Failed to create user in VyHub API" + e.getMessage());
+            getPlatform().log(Level.SEVERE, "Failed to create user in VyHub API" + e.getMessage());
             return null;
         }
 
@@ -84,9 +76,9 @@ public abstract class AUser {
 
         Response<VyHubUser> response;
         try {
-            response = platform.getApiClient().getUser(UUID).execute();
+            response = getPlatform().getApiClient().getUser(UUID).execute();
         } catch (IOException e) {
-            platform.log(Level.SEVERE, "Failed to get user from VyHub API" + e.getMessage());
+            getPlatform().log(Level.SEVERE, "Failed to get user from VyHub API" + e.getMessage());
             return null;
         }
 
@@ -113,7 +105,7 @@ public abstract class AUser {
                 return vyHubUser;
             }
 
-            platform.log(INFO, String.format("Could not find VyHub user for player %s, creating..", UUID));
+            getPlatform().log(INFO, String.format("Could not find VyHub user for player %s, creating..", UUID));
 
             if (response.code() == 404) {
                 vyHubUser = createUser(UUID);

@@ -9,22 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public abstract class AAdvert {
+public abstract class AAdvert extends SuperClass {
     private static List<Advert> adverts = new ArrayList<>();
 
     private static int currentAdvert = 0;
 
-    private final VyHubPlatform platform;
-
     public AAdvert(VyHubPlatform platform) {
-        this.platform = platform;
+        super(platform);
     }
 
-
     public void loadAdverts() {
-        platform.executeAsync(() -> {
+        getPlatform().executeAsync(() -> {
             try {
-                adverts = platform.getApiClient().getAdverts(AServer.serverbundleID).execute().body();
+                adverts = getPlatform().getApiClient().getAdverts(AServer.serverbundleID).execute().body();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

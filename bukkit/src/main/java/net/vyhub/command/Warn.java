@@ -18,6 +18,7 @@ public class Warn extends AWarning implements CommandExecutor {
         super(platform, aBans, aUser);
     }
 
+    // warn <player> <reason>
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         Player processor;

@@ -11,25 +11,19 @@ import java.util.*;
 import static java.util.logging.Level.*;
 import static net.vyhub.lib.Utility.checkResponse;
 
-public abstract class AGroups {
+public abstract class AGroups extends SuperClass {
     private static List<Group> groups;
     private static Map<String, Group> mappedGroups;
     public static List<String> groupChangeBacklog = new ArrayList<>();
-
-    private final VyHubPlatform platform;
     private final AUser aUser;
 
     public AGroups(VyHubPlatform platform, AUser aUser) {
-        this.platform = platform;
+        super(platform);
         this.aUser = aUser;
     }
 
     public AUser getAUser() {
         return aUser;
-    }
-
-    public VyHubPlatform getPlatform() {
-        return platform;
     }
 
     public Map<String, Group> getMappedGroups() {
@@ -39,9 +33,9 @@ public abstract class AGroups {
     public void updateGroups() {
         Response<List<Group>> response = null;
         try {
-            response = platform.getApiClient().getGroups().execute();
+            response = getPlatform().getApiClient().getGroups().execute();
         } catch (IOException e) {
-            platform.log(SEVERE, "Failed to fetch groups from VyHub API: " + e.getMessage());
+            getPlatform().log(SEVERE, "Failed to fetch groups from VyHub API: " + e.getMessage());
             return;
         }
 
@@ -76,9 +70,9 @@ public abstract class AGroups {
         Response<List<Group>> response = null;
 
         try {
-            response = platform.getApiClient().getUserGroups(user.getId(), AServer.serverbundleID).execute();
+            response = getPlatform().getApiClient().getUserGroups(user.getId(), AServer.serverbundleID).execute();
         } catch (IOException e) {
-            platform.log(SEVERE, "Failed to fetch memberships from VyHub API: " + e.getMessage());
+            getPlatform().log(SEVERE, "Failed to fetch memberships from VyHub API: " + e.getMessage());
         }
 
         if (!checkResponse(getPlatform(), response, "Fetch Memberships")) {
@@ -95,7 +89,7 @@ public abstract class AGroups {
             allGroups.add(group.getName());
         });
 
-        platform.executeAsync(() -> {
+        getPlatform().executeAsync(() -> {
             addPlayerToLuckpermsGroups(allGroups, user.getIdentifier());
         });
     }
@@ -107,7 +101,7 @@ public abstract class AGroups {
         Group group = mappedGroups.getOrDefault(groupName, null);
 
         if (group == null) {
-            platform.log(WARNING, String.format("Could not find group mapping for %s.", groupName));
+            getPlatform().log(WARNING, String.format("Could not find group mapping for %s.", groupName));
             return;
         }
 
@@ -118,50 +112,50 @@ public abstract class AGroups {
 
         Response<Membership> response;
         try {
-            response = platform.getApiClient().createMembership(user.getId(), Utility.createRequestBody(values)).execute();
+            response = getPlatform().getApiClient().createMembership(user.getId(), Utility.createRequestBody(values)).execute();
         } catch (IOException e) {
-            platform.log(SEVERE, "Could not add user to groups." + e.getMessage());
+            getPlatform().log(SEVERE, "Could not add user to groups." + e.getMessage());
             return;
         }
 
         if (!response.isSuccessful()) {
-            platform.log(WARNING, String.format("Could not add user to group %s.", groupName));
+            getPlatform().log(WARNING, String.format("Could not add user to group %s.", groupName));
         }
-        platform.log(INFO, String.format("Added VyHub group membership in group %s for player %s.", groupName, user.getUsername()));
+        getPlatform().log(INFO, String.format("Added VyHub group membership in group %s for player %s.", groupName, user.getUsername()));
     }
 
     public void removeUserFromVyHubGroup(VyHubUser user, String groupName) {
         Group group = mappedGroups.getOrDefault(groupName, null);
 
         if (group == null) {
-            platform.log(WARNING, String.format("Could not find group mapping for %s.", groupName));
+            getPlatform().log(WARNING, String.format("Could not find group mapping for %s.", groupName));
             return;
         }
 
         Response<Membership> response;
         try {
-            response = platform.getApiClient().deleteMembership(user.getId(), group.getId(), AServer.serverbundleID).execute();
+            response = getPlatform().getApiClient().deleteMembership(user.getId(), group.getId(), AServer.serverbundleID).execute();
         } catch (IOException e) {
-            platform.log(SEVERE, "Could not remove user from groups." + e.getMessage());
+            getPlatform().log(SEVERE, "Could not remove user from groups." + e.getMessage());
             return;
         }
 
         if (!response.isSuccessful()) {
-            platform.log(WARNING, String.format("Could not remove group %s from user %s", groupName, user.getUsername()));
+            getPlatform().log(WARNING, String.format("Could not remove group %s from user %s", groupName, user.getUsername()));
         }
-        platform.log(INFO, String.format("Ended VyHub group membership in group %s for player %s.", groupName, user.getUsername()));
+        getPlatform().log(INFO, String.format("Ended VyHub group membership in group %s for player %s.", groupName, user.getUsername()));
     }
 
     public void removeUserFromAllVyHubGroups(VyHubUser user) {
         Response<Membership> response;
         try {
-            response = platform.getApiClient().deleteAllMemberships(user.getId(), AServer.serverbundleID).execute();
+            response = getPlatform().getApiClient().deleteAllMemberships(user.getId(), AServer.serverbundleID).execute();
         } catch (IOException e) {
-            platform.log(SEVERE, "Could not remove user from all VyHub groups." + e.getMessage());
+            getPlatform().log(SEVERE, "Could not remove user from all VyHub groups." + e.getMessage());
             return;
         }
 
-        platform.log(INFO, String.format("Ended all VyHub group memberships for player %s.", user.getUsername()));
+        getPlatform().log(INFO, String.format("Ended all VyHub group memberships for player %s.", user.getUsername()));
     }
 
     public static String getBacklogKey(String playerID, String groupName, String operation) {

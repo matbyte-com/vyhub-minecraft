@@ -3,6 +3,7 @@ package net.vyhub.abstractClasses;
 import com.google.gson.reflect.TypeToken;
 import net.vyhub.VyHubPlatform;
 import net.vyhub.entity.Definition;
+import net.vyhub.entity.VyHubUser;
 import net.vyhub.lib.Cache;
 import net.vyhub.lib.Utility;
 import retrofit2.Response;
@@ -10,17 +11,16 @@ import retrofit2.Response;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.SEVERE;
+import static net.vyhub.lib.Utility.checkResponse;
 
-public abstract class AStatistics {
+public abstract class AStatistics extends SuperClass {
     public static Map<String, Double> playerTime = new HashMap<>();
     private static String definitionID;
-
-    private final VyHubPlatform platform;
     private final AUser aUser;
-
     public static Cache<Map<String, Double>> statisticCache = new Cache<>(
             "statistics",
             new TypeToken<HashMap<String, Double>>() {
@@ -28,7 +28,7 @@ public abstract class AStatistics {
     );
 
     public AStatistics(VyHubPlatform platform, AUser aUser) {
-        this.platform = platform;
+        super(platform);
         this.aUser = aUser;
     }
 
@@ -44,10 +44,10 @@ public abstract class AStatistics {
         Response<Definition> response;
         Definition definition;
         try {
-            response = platform.getApiClient().getPlaytimeDefinition().execute();
+            response = getPlatform().getApiClient().getPlaytimeDefinition().execute();
             definition = response.body();
         } catch (IOException e) {
-            platform.log(SEVERE, "Failed to get playtime definition: " + e.getMessage());
+            getPlatform().log(SEVERE, "Failed to get playtime definition: " + e.getMessage());
             return null;
         }
 
@@ -57,7 +57,7 @@ public abstract class AStatistics {
         }
 
         if (response.code() == 404) {
-            platform.log(INFO, "Playtime definition not found. Creating...");
+            getPlatform().log(INFO, "Playtime definition not found. Creating...");
             HashMap<String, Object> values = new HashMap<String, Object>() {{
                 put("name", "playtime");
                 put("title", "Play Time");
@@ -68,10 +68,10 @@ public abstract class AStatistics {
             }};
 
             try {
-                response = platform.getApiClient().createPlaytimeDefinition(Utility.createRequestBody(values)).execute();
+                response = getPlatform().getApiClient().createPlaytimeDefinition(Utility.createRequestBody(values)).execute();
                 definition = response.body();
             } catch (IOException e) {
-                platform.log(SEVERE, "Failed to create playtime definition: " + e.getMessage());
+                getPlatform().log(SEVERE, "Failed to create playtime definition: " + e.getMessage());
                 return null;
             }
 
@@ -84,19 +84,56 @@ public abstract class AStatistics {
         return null;
     }
 
-    public abstract void sendPlayerTime();
+    public void sendPlayerTime() {
+        super.getPlatform().log(INFO, "Sending playertime to API");
+
+        String definitionID = checkDefinition();
+
+        if (definitionID != null) {
+            for (Map.Entry<String, Double> entry : playerTime.entrySet()) {
+                String playerID = entry.getKey();
+                VyHubUser user = getAUser().getUser(playerID);
+
+                if (user != null) {
+                    double hours = Math.round((entry.getValue() / 60) * 100.0) / 100.0;
+
+                    if (hours < 0.1) {
+                        continue;
+                    }
+
+                    HashMap<String, Object> values = new HashMap<String, Object>() {{
+                        put("definition_id", definitionID);
+                        put("user_id", user.getId());
+                        put("serverbundle_id", AServer.serverbundleID);
+                        put("value", hours);
+                    }};
+
+                    Response response = null;
+                    try {
+                        response = super.getPlatform().getApiClient().sendPlayerTime(Utility.createRequestBody(values)).execute();
+                    } catch (IOException e) {
+                        super.getPlatform().log(Level.SEVERE, "Failed to send player time to VyHub API" + e.getMessage());
+                    }
+
+                    if (!checkResponse(getPlatform(), response, "Send playtime statistic to API")) {
+                        continue;
+                    }
+
+                    resetPlayerTime(playerID);
+                }
+            }
+        }
+
+        statisticCache.save(playerTime);
+    }
 
     public void resetPlayerTime(String playerID) {
         playerTime.replace(playerID, 0.0);
     }
 
-    public abstract void playerTime();
+    public abstract void collectPlayerTime();
 
     public Cache<Map<String, Double>> getStatisticCache() {
         return statisticCache;
-    }
-
-    public VyHubPlatform getPlatform() {
-        return platform;
     }
 }

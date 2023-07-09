@@ -4,24 +4,22 @@ import net.vyhub.VyHubPlatform;
 import net.vyhub.config.VyHubConfiguration;
 import net.vyhub.entity.Server;
 import net.vyhub.lib.Cache;
+import net.vyhub.lib.Utility;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.util.HashMap;
 
-public abstract class AServer {
+import static net.vyhub.lib.Utility.checkResponse;
+
+public abstract class AServer extends SuperClass {
     private static Cache<Server> serverCache = new Cache<>("server", Server.class);
     public static String serverbundleID = null;
-
-    private final VyHubPlatform platform;
     private final AUser aUser;
 
     public AServer(VyHubPlatform platform, AUser aUser) {
-        this.platform = platform;
+        super(platform);
         this.aUser = aUser;
-    }
-
-    public VyHubPlatform getPlatform() {
-        return platform;
     }
 
     public AUser getAUser() {
@@ -39,8 +37,7 @@ public abstract class AServer {
 
         Response<Server> response = null;
         try {
-            // TODO Make Async (maybe? not necessary)
-            response = platform.getApiClient().getServer(serverID).execute();
+            response = getPlatform().getApiClient().getServer(serverID).execute();
         } catch (IOException e) {
             server = serverCache.load();
         }
@@ -57,5 +54,19 @@ public abstract class AServer {
         return server;
     }
 
-    public abstract void patchServer();
+    public abstract HashMap<String, Object> collectServerStatistics();
+
+    public void patchServer() {
+        HashMap<String, Object> values = collectServerStatistics();
+
+        Response response = null;
+        try {
+            response = getPlatform().getApiClient().patchServer(VyHubConfiguration.getServerId(), Utility.createRequestBody(values)).execute();
+        } catch (IOException e) {
+            return;
+        }
+
+        checkResponse(getPlatform(), response, "Patch server");
+
+    }
 }

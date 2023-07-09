@@ -10,7 +10,6 @@ import net.vyhub.abstractClasses.AServer;
 import net.vyhub.command.*;
 import net.vyhub.config.I18n;
 import net.vyhub.config.VyHubConfiguration;
-import net.vyhub.lib.PlayerGivenPermissionListener;
 import net.vyhub.lib.Utility;
 import net.vyhub.tasks.*;
 import okhttp3.OkHttpClient;
@@ -29,9 +28,6 @@ import static java.util.logging.Level.WARNING;
 
 public class VyHubPlugin extends JavaPlugin {
     public static JavaPlugin plugin;
-    private LuckPerms luckPerms;
-
-    private final VyHubConfiguration configuration = new VyHubConfiguration();
     public static BukkitScheduler scheduler = Bukkit.getScheduler();
     private static int readyCheckTaskID;
     private static int playerTimeID;
@@ -40,6 +36,7 @@ public class VyHubPlugin extends JavaPlugin {
     private OkHttpClient httpClient;
     private I18n i18n;
     public Ban ban;
+    public TBans tBans;
     public Config config;
     public Login login;
     public Warn warn;
@@ -65,40 +62,37 @@ public class VyHubPlugin extends JavaPlugin {
     public void onEnable() {
         plugin = this;
         platform = new BukkitVyHubPlatform(this);
+
         // Load Command and Task classes
         tUser = new TUser(this.platform);
         config = new Config(this);
         login = new Login(this);
-        warn = new Warn(this.platform, this.ban, this.tUser);
         tAdvert = new TAdvert(this.platform);
         tServer = new TServer(this.platform, this.tUser);
         tRewards = new TRewards(this.platform, this.tUser);
         tStatistics = new TStatistics(this.platform, this.tUser);
-
-        // Configuration, I18N and API Client
-        VyHubConfiguration.loadConfig();
-        i18n = new I18n(VyHubConfiguration.getLocale());
-        httpClient = Utility.okhttp(new File(getDataFolder(), "cache"));
-
-        playerTimeID = scheduler.runTaskTimer(plugin, tStatistics::playerTime, 20L * 1L, 20L * 60L).getTaskId();
-
-        sendStartupMessage();
-
-        // Plugin startup logic
         if (luckPermsInstalled()) {
             tGroups = new TGroups(this.platform, this.tUser);
-            this.luckPerms = getServer().getServicesManager().load(LuckPerms.class);
-            new PlayerGivenPermissionListener(this, this.luckPerms).register();
         } else {
             this.platform.log(INFO, "LuckPerms not found. Disabling group sync");
         }
+        tBans = new TBans(this.platform, this.tUser, this.tGroups);
+        ban = new Ban(this.platform, this.tGroups);
+        warn = new Warn(this.platform, this.tBans, this.tUser);
 
-        ban = new Ban(this.platform, this.tUser, this.tGroups);
+        // Configuration, I18N and API Client
+        VyHubConfiguration.loadConfig();
+        VyHubConfiguration.setPlatform(platform);
+        i18n = new I18n(VyHubConfiguration.getLocale());
+        httpClient = Utility.okhttp(new File(getDataFolder(), "cache"));
 
+        sendStartupMessage();
 
         plugin.getCommand("vh_config").setExecutor(config);
         plugin.getCommand("vh_setup").setExecutor(config);
 
+        // Start collecting player time even before plugin is connected
+        playerTimeID = scheduler.runTaskTimer(plugin, tStatistics::collectPlayerTime, 20L * 1L, 20L * 60L).getTaskId();
         readyCheckTaskID = scheduler.runTaskTimer(this, this::checkReady, 0, 20L * 60L).getTaskId();
     }
 
@@ -116,8 +110,8 @@ public class VyHubPlugin extends JavaPlugin {
         TRewards.loadExecuted();
 
         scheduler.runTaskTimerAsynchronously(plugin, tServer::patchServer, 20L * 1L, 20L * 60L);
-        scheduler.runTaskTimerAsynchronously(plugin, ban::syncBans, 20L * 1L, 20L * 60L);
-        scheduler.runTaskTimerAsynchronously(plugin, tStatistics::playerTime, 20L * 1L, 20L * 60L);
+        scheduler.runTaskTimerAsynchronously(plugin, tBans::syncBans, 20L * 1L, 20L * 60L);
+        scheduler.runTaskTimerAsynchronously(plugin, tStatistics::collectPlayerTime, 20L * 1L, 20L * 60L);
         scheduler.runTaskTimerAsynchronously(plugin, tRewards::fetchRewards, 20L * 5L, 20L * 60L);
         scheduler.runTaskTimer(plugin, tRewards::runDirectRewards, 20L * 1L, 20L * 60L);
         scheduler.runTaskTimerAsynchronously(plugin, tStatistics::sendPlayerTime, 20L * 5L, 20L * 60L * 45L);
@@ -166,9 +160,9 @@ public class VyHubPlugin extends JavaPlugin {
         }
 
         if (Objects.equals(apiBaseUrl, "") || Objects.equals(apiKey, "")) {
-            getLogger().log(INFO, "Looks like this is a fresh setup. Get started by using 'vh_config' in the console.");
+            this.platform.log(INFO, "Looks like this is a fresh setup. Get started by creating a server and generating the correct command in your VyHub server settings.");
         } else {
-            getLogger().info("Validating API credentials...");
+            this.platform.log(INFO, "Validating API credentials...");
             apiClient = VyHubAPI.create(apiBaseUrl, apiKey, httpClient);
         }
 

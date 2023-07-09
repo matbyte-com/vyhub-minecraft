@@ -5,7 +5,6 @@ import net.vyhub.abstractClasses.AUser;
 import net.vyhub.event.VyHubPlayerInitializedEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -49,4 +48,5 @@ public class TUser extends AUser implements Listener {
         }
         player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
     }
+
 }

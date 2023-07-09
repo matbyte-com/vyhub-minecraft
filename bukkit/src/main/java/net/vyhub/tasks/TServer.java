@@ -22,7 +22,7 @@ public class TServer extends AServer {
     public TServer(VyHubPlatform platform, AUser aUser) {
         super(platform, aUser);
     }
-    public void patchServer() {
+    public HashMap<String, Object> collectServerStatistics() {
         List<Map<String, Object>> user_activities = new LinkedList<>();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -49,13 +49,6 @@ public class TServer extends AServer {
             put("is_alive", "true");
         }};
 
-        Response response = null;
-        try {
-            response = getPlatform().getApiClient().patchServer(VyHubConfiguration.getServerId(), Utility.createRequestBody(values)).execute();
-        } catch (IOException e) {
-            return;
-        }
-
-        checkResponse(getPlatform(), response, "Patch server");
+        return values;
     }
 }

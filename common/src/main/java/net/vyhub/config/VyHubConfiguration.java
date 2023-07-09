@@ -1,18 +1,17 @@
 package net.vyhub.config;
 
 import com.google.gson.reflect.TypeToken;
+import net.vyhub.VyHubPlatform;
 import net.vyhub.lib.Cache;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
 
 public class VyHubConfiguration {
     private static Map<String, String> config;
-
-    public VyHubConfiguration() {
-        config = new HashMap<>();
-    }
+    private static VyHubPlatform platform;
 
     public static Cache<Map<String, String>> configCache = new Cache<>(
             "config",
@@ -20,12 +19,15 @@ public class VyHubConfiguration {
             }.getType()
     );
 
+    public static void setPlatform(VyHubPlatform newPlatform) {
+        platform = newPlatform;
+    }
+
     public static Map<String, String> loadConfig() {
         Map<String, String> configMap = configCache.load();
 
         if (configMap == null || configMap.get("api_url") == null || configMap.get("api_key") == null || configMap.get("server_id") == null) {
-            // TODO reactivate Logging
-            // VyHubPlatform.log(Level.WARNING, "Config file does not exist or is invalid, creating new one...");
+            platform.log(Level.WARNING, "Config file does not exist or is invalid, creating new one...");
 
             config.put("api_url", "");
             config.put("api_key", "");
@@ -44,8 +46,7 @@ public class VyHubConfiguration {
 
     public static void setConfigValue(String key, String value) {
         config.put(key, value);
-        // TODO reactivate Logging
-        // getLogger().log(Level.INFO, String.format("Set config value %s -> %s.", key, value));
+        platform.log(Level.INFO, String.format("Set config value %s -> %s.", key, value));
         updateCache();
     }
 
