@@ -32,6 +32,10 @@ public abstract class AGroups {
         return platform;
     }
 
+    public Map<String, Group> getMappedGroups() {
+        return mappedGroups;
+    }
+
     public void updateGroups() {
         Response<List<Group>> response = null;
         try {
@@ -77,7 +81,9 @@ public abstract class AGroups {
             platform.log(SEVERE, "Failed to fetch memberships from VyHub API: " + e.getMessage());
         }
 
-        checkResponse(getPlatform(), response, "Fetch Memberships");
+        if (!checkResponse(getPlatform(), response, "Fetch Memberships")) {
+            return;
+        }
 
         List<Group> vyhubGroups = response.body();
         List<String> allGroups = new ArrayList<>();
@@ -90,11 +96,11 @@ public abstract class AGroups {
         });
 
         platform.executeAsync(() -> {
-            addPlayerToLuckpermsGroup(allGroups, user.getIdentifier());
+            addPlayerToLuckpermsGroups(allGroups, user.getIdentifier());
         });
     }
 
-    public abstract void addPlayerToLuckpermsGroup(List<String> allGroups, UUID playerId);
+    public abstract void addPlayerToLuckpermsGroups(List<String> allGroups, UUID playerId);
 
 
     public void addUserToVyHubGroup(VyHubUser user, String groupName) {

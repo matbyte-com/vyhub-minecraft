@@ -9,6 +9,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import static org.bukkit.Bukkit.getServer;
 
@@ -28,6 +29,15 @@ public class TUser extends AUser implements Listener {
 
         getPlatform().executeAsync(() -> {
             checkPlayerExists(player.getUniqueId().toString(), player.getName());
+        });
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+
+        getPlatform().executeAsync(() -> {
+            onPlayerDisconnect(player.getUniqueId().toString());
         });
     }
 

@@ -99,7 +99,7 @@ public class TGroups extends AGroups implements Listener {
         });
     }
 
-    public void addPlayerToLuckpermsGroup(List<String> allGroups, UUID playerId) {
+    public void addPlayerToLuckpermsGroups(List<String> allGroups, UUID playerId) {
         Player player = Bukkit.getPlayer(playerId);
         if (player == null) {
             getPlatform().log(Level.WARNING, "Group-Sync: Player with could not be found on server");
@@ -121,13 +121,13 @@ public class TGroups extends AGroups implements Listener {
                     if (!currentNodes.contains(node)) {
                         groupChangeBacklog.add(getBacklogKey(playerID, groupName, "add"));
                         user.data().add(node);
-                        // player.sendMessage(ChatColor.GOLD + "You were added to group " + groupName);
                     }
                 }
             }
 
             for (InheritanceNode n : currentNodes) {
-                if (!nodes.contains(n)) {
+                // Only remove group if there is a mapping for it. Otherwise, let it there
+                if (!nodes.contains(n) && getMappedGroups().containsKey(n.getGroupName())) {
                     groupChangeBacklog.add(getBacklogKey(playerID, n.getGroupName(), "remove"));
                     user.data().remove(n);
                 }

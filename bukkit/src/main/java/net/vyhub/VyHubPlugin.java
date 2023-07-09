@@ -15,8 +15,8 @@ import net.vyhub.lib.Utility;
 import net.vyhub.tasks.*;
 import okhttp3.OkHttpClient;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import retrofit2.Response;
@@ -82,6 +82,7 @@ public class VyHubPlugin extends JavaPlugin {
 
         playerTimeID = scheduler.runTaskTimer(plugin, tStatistics::playerTime, 20L * 1L, 20L * 60L).getTaskId();
 
+        sendStartupMessage();
 
         // Plugin startup logic
         if (luckPermsInstalled()) {
@@ -119,13 +120,13 @@ public class VyHubPlugin extends JavaPlugin {
         scheduler.runTaskTimerAsynchronously(plugin, tStatistics::playerTime, 20L * 1L, 20L * 60L);
         scheduler.runTaskTimerAsynchronously(plugin, tRewards::fetchRewards, 20L * 5L, 20L * 60L);
         scheduler.runTaskTimer(plugin, tRewards::runDirectRewards, 20L * 1L, 20L * 60L);
-        scheduler.runTaskTimerAsynchronously(plugin, tStatistics::sendPlayerTime, 20L * 5L, 20L * 60L); // *30L
+        scheduler.runTaskTimerAsynchronously(plugin, tStatistics::sendPlayerTime, 20L * 5L, 20L * 60L * 45L);
         scheduler.runTaskTimerAsynchronously(plugin, tAdvert::loadAdverts, 20L * 1L, 20L * 60L * 5L);
         scheduler.runTaskTimerAsynchronously(plugin, tAdvert::nextAdvert, 20L * 5L, 20L * Integer.parseInt(VyHubConfiguration.getAdvertInterval()));
 
         if (luckPermsInstalled()) {
-            scheduler.runTaskTimerAsynchronously(plugin, tGroups::updateGroups, 20L * 1L, 20L * 60L); // *5L
-            scheduler.runTaskTimerAsynchronously(plugin, tGroups::syncGroupsForAll, 20L * 60L, 20L * 60L); // *10L und *8L
+            scheduler.runTaskTimerAsynchronously(plugin, tGroups::updateGroups, 20L * 1L, 20L * 60L * 5L);
+            scheduler.runTaskTimerAsynchronously(plugin, tGroups::syncGroupsForAll, 20L * 60L * 10L, 20L * 60L * 8L);
         }
     }
 
@@ -135,6 +136,7 @@ public class VyHubPlugin extends JavaPlugin {
         pluginManager.registerEvents(tUser, plugin);
         pluginManager.registerEvents(tRewards, plugin);
 
+        // Register Following Commands and Events only when LuckPerms is installed
         if (!luckPermsInstalled()) {
             return;
         }
@@ -197,5 +199,11 @@ public class VyHubPlugin extends JavaPlugin {
 
     public boolean luckPermsInstalled() {
         return Bukkit.getPluginManager().isPluginEnabled("LuckPerms");
+    }
+    public void sendStartupMessage() {
+        Bukkit.getConsoleSender().sendMessage("");
+        Bukkit.getConsoleSender().sendMessage("  \\  / |__|   " + ChatColor.DARK_RED + "VyHub" + ChatColor.AQUA + " v" + plugin.getDescription().getVersion());
+        Bukkit.getConsoleSender().sendMessage("   \\/  |  |   " + ChatColor.DARK_GRAY + "Running on Bukkit");
+        Bukkit.getConsoleSender().sendMessage("");
     }
 }

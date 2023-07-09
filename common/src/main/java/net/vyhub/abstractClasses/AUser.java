@@ -136,4 +136,8 @@ public abstract class AUser {
             return null;
         }
     }
+
+    public void onPlayerDisconnect(String playerId) {
+        vyHubPlayers.remove(playerId);
+    }
 }
