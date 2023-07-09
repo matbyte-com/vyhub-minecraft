@@ -1,0 +1,4 @@
+[submodule "common/src/main/resources"]
+	path = common/src/main/resources
+	url = git@github.com:matbyte-com/vyhub-lang.git
+    branch = minecraft
