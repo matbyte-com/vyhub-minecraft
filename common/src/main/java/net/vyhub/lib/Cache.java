@@ -29,7 +29,8 @@ public class Cache<T> {
 
     private String readFile() {
         try {
-            return Files.readString(Paths.get(filename), StandardCharsets.UTF_8);
+            byte[] encodedBytes = Files.readAllBytes(Paths.get(filename));
+            return new String(encodedBytes, StandardCharsets.UTF_8);
         } catch (IOException e) {
             return null;
         }

@@ -40,7 +40,7 @@ public class TStatistics extends AStatistics {
                         continue;
                     }
 
-                    HashMap<String, Object> values = new HashMap<>() {{
+                    HashMap<String, Object> values = new HashMap<String, Object>() {{
                         put("definition_id", definitionID);
                         put("user_id", user.getId());
                         put("serverbundle_id", AServer.serverbundleID);

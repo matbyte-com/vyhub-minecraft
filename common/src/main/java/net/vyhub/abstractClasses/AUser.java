@@ -47,7 +47,7 @@ public abstract class AUser {
     public abstract void sendMessage(String playerName, String message);
 
     public VyHubUser createUser(String UUID) {
-        HashMap<String, Object> values = new HashMap<>() {{
+        HashMap<String, Object> values = new HashMap<String, Object>() {{
             put("type", "MINECRAFT");
             put("identifier", UUID);
         }};

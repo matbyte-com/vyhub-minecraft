@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class TAdvert extends AAdvert {
@@ -32,7 +33,7 @@ public class TAdvert extends AAdvert {
     }
 
     public void showAdvert(Advert advert) {
-        List<String> lines = List.of(advert.getContent().split(System.lineSeparator()));
+        String[] lines = advert.getContent().split(System.lineSeparator());
         String prefix = String.format("%s%s", ChatColor.BLUE, VyHubConfiguration.getAdvertPrefix());
 
         for (String line : lines) {

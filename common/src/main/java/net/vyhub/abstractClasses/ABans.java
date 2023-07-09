@@ -57,7 +57,7 @@ public abstract class ABans {
 
     public void fetchMinecraftBans() {
         try {
-            String bansJson = Files.readString(Paths.get("banned-players.json"), StandardCharsets.UTF_8);
+            String bansJson = new String(Files.readAllBytes(Paths.get("banned-players.json")), StandardCharsets.UTF_8);
 
             Type minecraftBansType = new TypeToken<List<MinecraftBan>>() {
             }.getType();
@@ -218,7 +218,7 @@ public abstract class ABans {
         }
 
         Long finalTime = time;
-        HashMap<String, Object> values = new HashMap<>() {{
+        HashMap<String, Object> values = new HashMap<String, Object>() {{
             put("length", finalTime);
             put("reason", minecraftBan.getReason());
             put("serverbundle_id", AServer.serverbundleID);

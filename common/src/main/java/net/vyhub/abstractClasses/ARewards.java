@@ -101,7 +101,7 @@ public abstract class ARewards {
         serverID.add(VyHubConfiguration.getServerId());
 
         List<String> newExecutedAndSentRewards = new ArrayList<>();
-        HashMap<String, Object> values = new HashMap<>() {{
+        HashMap<String, Object> values = new HashMap<String, Object>() {{
             put("executed_on", serverID);
         }};
 

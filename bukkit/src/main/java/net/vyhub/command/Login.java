@@ -33,7 +33,7 @@ public class Login implements CommandExecutor {
         Player player = (Player) sender;
 
         plugin.getPlatform().executeAsync(() -> {
-            HashMap<String, Object> values = new HashMap<>() {{
+            HashMap<String, Object> values = new HashMap<String, Object>() {{
                 put("user_type", "MINECRAFT");
                 put("identifier", player.getUniqueId());
             }};

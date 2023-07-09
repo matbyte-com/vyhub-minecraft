@@ -36,7 +36,7 @@ public abstract class AWarning {
         }
 
         String finalVyHubPlayerUUID = vyHubUser.getId();
-        HashMap<String, Object> values = new HashMap<>() {{
+        HashMap<String, Object> values = new HashMap<String, Object>() {{
             put("reason", reason);
             put("serverbundle_id", AServer.serverbundleID);
             put("user_id", finalVyHubPlayerUUID);

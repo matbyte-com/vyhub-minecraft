@@ -111,7 +111,7 @@ public abstract class AGroups {
             return;
         }
 
-        HashMap<String, Object> values = new HashMap<>() {{
+        HashMap<String, Object> values = new HashMap<String, Object>() {{
             put("group_id", group.getId());
             put("serverbundle_id", AServer.serverbundleID);
         }};

@@ -58,7 +58,7 @@ public abstract class AStatistics {
 
         if (response.code() == 404) {
             platform.log(INFO, "Playtime definition not found. Creating...");
-            HashMap<String, Object> values = new HashMap<>() {{
+            HashMap<String, Object> values = new HashMap<String, Object>() {{
                 put("name", "playtime");
                 put("title", "Play Time");
                 put("unit", "HOURS");

@@ -42,7 +42,7 @@ public class TServer extends AServer {
             }
         }
 
-        HashMap<String, Object> values = new HashMap<>() {{
+        HashMap<String, Object> values = new HashMap<String, Object>() {{
             put("users_max", String.valueOf(Bukkit.getMaxPlayers()));
             put("users_current", String.valueOf(Bukkit.getOnlinePlayers().size()));
             put("user_activities", user_activities);
