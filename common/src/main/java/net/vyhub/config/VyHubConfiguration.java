@@ -76,5 +76,4 @@ public class VyHubConfiguration {
     public static void updateCache() {
         configCache.save(config);
     }
-
 }
