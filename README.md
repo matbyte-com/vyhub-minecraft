@@ -12,4 +12,4 @@ This is the [VyHub](https://vyhub.net) addon for Minecraft.
 
 Create your account for free on our [website](https://vyhub.net).
 
-The documentation can be found [here](https://docs.vyhub.net/latest/game/gmod/).
+The documentation can be found [here](https://docs.vyhub.net/latest/game/minecraft/).
