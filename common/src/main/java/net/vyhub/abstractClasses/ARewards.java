@@ -15,7 +15,7 @@ import java.util.*;
 
 import static java.util.logging.Level.*;
 
-public abstract class ARewards extends SuperClass {
+public abstract class ARewards extends VyHubAbstractBase {
     private static Map<String, List<AppliedReward>> rewards;
     private static List<String> executedRewards = new ArrayList<>();
     private static List<String> executedAndSentRewards = new ArrayList<>();
@@ -67,9 +67,9 @@ public abstract class ARewards extends SuperClass {
         Response<Map<String, List<AppliedReward>>> response = null;
 
         try {
-            response = getPlatform().getApiClient().getRewards(AServer.serverbundleID, VyHubConfiguration.getServerId(), stringBuilder.toString()).execute();
+            response = platform.getApiClient().getRewards(AServer.serverbundleID, VyHubConfiguration.getServerId(), stringBuilder.toString()).execute();
         } catch (IOException e) {
-            getPlatform().log(SEVERE, "Failed to get rewards from API." + e.getMessage());
+            platform.log(SEVERE, "Failed to get rewards from API." + e.getMessage());
         }
 
         if (response != null && response.isSuccessful()) {
@@ -110,7 +110,7 @@ public abstract class ARewards extends SuperClass {
             try {
                 player = getPlayer(_playerID);
             } catch (IllegalArgumentException e) {
-                getPlatform().log(WARNING, "Error while executing rewards: PlayerID: " + _playerID + " is not a valid UUID");
+                platform.log(WARNING, "Error while executing rewards: PlayerID: " + _playerID + " is not a valid UUID");
                 continue;
             }
 
@@ -133,20 +133,20 @@ public abstract class ARewards extends SuperClass {
                     } else {
                         success = false;
 
-                        getPlatform().log(WARNING, "No implementation for Reward Type: " + reward.getType());
+                        platform.log(WARNING, "No implementation for Reward Type: " + reward.getType());
                     }
                     if (reward.getOnce()) {
                         setExecuted(appliedReward.getId());
                     }
                     if (success) {
-                        getPlatform().log(INFO, "RewardName: " + appliedReward.getReward().getName() + " Type: " +
+                        platform.log(INFO, "RewardName: " + appliedReward.getReward().getName() + " Type: " +
                                 appliedReward.getReward().getType() + " Player: " + getPlayerName(player) + " executed!");
                     }
                 }
             }
         }
 
-        getPlatform().executeAsync(this::sendExecuted);
+        platform.executeAsync(this::sendExecuted);
     }
 
 
@@ -173,7 +173,7 @@ public abstract class ARewards extends SuperClass {
 
             Response<AppliedReward> response;
             try {
-                response = getPlatform().getApiClient().sendExecutedRewards(rewardID, Utility.createRequestBody(values)).execute();
+                response = platform.getApiClient().sendExecutedRewards(rewardID, Utility.createRequestBody(values)).execute();
             } catch (IOException e) {
                 e.printStackTrace();
                 continue;

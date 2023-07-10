@@ -2,14 +2,13 @@ package net.vyhub.abstractClasses;
 
 import net.vyhub.VyHubPlatform;
 import net.vyhub.entity.Advert;
-import net.vyhub.abstractClasses.AServer;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public abstract class AAdvert extends SuperClass {
+public abstract class AAdvert extends VyHubAbstractBase {
     private static List<Advert> adverts = new ArrayList<>();
 
     private static int currentAdvert = 0;
@@ -19,9 +18,9 @@ public abstract class AAdvert extends SuperClass {
     }
 
     public void loadAdverts() {
-        getPlatform().executeAsync(() -> {
+        platform.executeAsync(() -> {
             try {
-                adverts = getPlatform().getApiClient().getAdverts(AServer.serverbundleID).execute().body();
+                adverts = platform.getApiClient().getAdverts(AServer.serverbundleID).execute().body();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

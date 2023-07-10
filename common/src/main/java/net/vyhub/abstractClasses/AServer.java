@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 import static net.vyhub.lib.Utility.checkResponse;
 
-public abstract class AServer extends SuperClass {
+public abstract class AServer extends VyHubAbstractBase {
     private static Cache<Server> serverCache = new Cache<>("server", Server.class);
     public static String serverbundleID = null;
     private final AUser aUser;
@@ -37,7 +37,7 @@ public abstract class AServer extends SuperClass {
 
         Response<Server> response = null;
         try {
-            response = getPlatform().getApiClient().getServer(serverID).execute();
+            response = platform.getApiClient().getServer(serverID).execute();
         } catch (IOException e) {
             server = serverCache.load();
         }
@@ -61,12 +61,12 @@ public abstract class AServer extends SuperClass {
 
         Response response = null;
         try {
-            response = getPlatform().getApiClient().patchServer(VyHubConfiguration.getServerId(), Utility.createRequestBody(values)).execute();
+            response = platform.getApiClient().patchServer(VyHubConfiguration.getServerId(), Utility.createRequestBody(values)).execute();
         } catch (IOException e) {
             return;
         }
 
-        checkResponse(getPlatform(), response, "Patch server");
+        checkResponse(platform, response, "Patch server");
 
     }
 }

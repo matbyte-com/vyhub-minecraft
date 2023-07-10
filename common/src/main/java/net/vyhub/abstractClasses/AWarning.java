@@ -13,7 +13,7 @@ import java.util.HashMap;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.SEVERE;
 
-public abstract class AWarning extends SuperClass {
+public abstract class AWarning extends VyHubAbstractBase {
     public final ABans aBans;
     private final AUser aUser;
 
@@ -27,7 +27,7 @@ public abstract class AWarning extends SuperClass {
         VyHubUser vyHubUser = aUser.getUser(playerId);
 
         if (adminPlayerId != null && vyHubUser == null) {
-            aUser.sendMessage(adminPlayerName, getPlatform().getI18n().get("warningUnsuccessful"));
+            aUser.sendMessage(adminPlayerName, platform.getI18n().get("warningUnsuccessful"));
         }
 
         String finalVyHubPlayerUUID = vyHubUser.getId();
@@ -45,35 +45,35 @@ public abstract class AWarning extends SuperClass {
 
         Response<Warn> response;
         try {
-            VyHubAPI apiClient = getPlatform().getApiClient();
+            VyHubAPI apiClient = platform.getApiClient();
             if (adminPlayerId == null) response = apiClient.createWarningWithoutCreator(Utility.createRequestBody(values)).execute();
             else response = apiClient.createWarning(adminUserID, Utility.createRequestBody(values)).execute();
         } catch (IOException e) {
-            getPlatform().log(SEVERE, "Failed to create warning in VyHub API" + e.getMessage());
+            platform.log(SEVERE, "Failed to create warning in VyHub API" + e.getMessage());
             return;
         }
 
         if (response.code() != 200) {
             if (adminPlayerId != null) {
                 if (response.code() == 403) {
-                    aUser.sendMessage(adminPlayerName, getPlatform().getI18n().get("warningNoPermissions"));
+                    aUser.sendMessage(adminPlayerName, platform.getI18n().get("warningNoPermissions"));
                 } else {
-                    aUser.sendMessage(adminPlayerName, getPlatform().getI18n().get("warningUnsuccessful"));
+                    aUser.sendMessage(adminPlayerName, platform.getI18n().get("warningUnsuccessful"));
                     try {
-                        getPlatform().log(SEVERE,response.errorBody().toString());
+                        platform.log(SEVERE,response.errorBody().toString());
                     } catch (Exception e) {
                         return;
                     }
                 }
             }
         } else {
-            aUser.sendMessage(playerName, String.format(getPlatform().getI18n().get("warningReceived"), reason));
-            aUser.sendMessage(playerName, getPlatform().getI18n().get("warningNotice"));
+            aUser.sendMessage(playerName, String.format(platform.getI18n().get("warningReceived"), reason));
+            aUser.sendMessage(playerName, platform.getI18n().get("warningNotice"));
 
-            getPlatform().log(INFO, String.format("§c[WARN] §9Warned user %s:§6 %s", playerName, reason));
+            platform.log(INFO, String.format("§c[WARN] §9Warned user %s:§6 %s", playerName, reason));
 
             if (adminPlayerId != null) {
-                aUser.sendMessage(adminPlayerName, String.format(getPlatform().getI18n().get("warningSuccessful"), playerName, reason));
+                aUser.sendMessage(adminPlayerName, String.format(platform.getI18n().get("warningSuccessful"), playerName, reason));
             }
 
             aBans.syncBans();

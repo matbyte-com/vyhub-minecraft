@@ -81,8 +81,8 @@ public class VyHubPlugin extends JavaPlugin {
         warn = new Warn(this.platform, this.tBans, this.tUser);
 
         // Configuration, I18N and API Client
-        VyHubConfiguration.loadConfig();
         VyHubConfiguration.setPlatform(platform);
+        VyHubConfiguration.loadConfig();
         i18n = new I18n(VyHubConfiguration.getLocale());
         httpClient = Utility.okhttp(new File(getDataFolder(), "cache"));
 

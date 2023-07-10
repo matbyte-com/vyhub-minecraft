@@ -23,7 +23,7 @@ import java.util.*;
 import static java.util.logging.Level.*;
 import static net.vyhub.VyHubAPI.gson;
 
-public abstract class ABans extends SuperClass{
+public abstract class ABans extends VyHubAbstractBase{
     public static DateTimeFormatter isoDateFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
     public static DateTimeFormatter mcDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss ZZZ");
     private static Set<String> processedPlayers = new HashSet<>();
@@ -68,15 +68,15 @@ public abstract class ABans extends SuperClass{
         Response<Map<String, List<Ban>>> response = null;
 
         try {
-            response = getPlatform().getApiClient().getBans(AServer.serverbundleID).execute();
+            response = platform.getApiClient().getBans(AServer.serverbundleID).execute();
         } catch (IOException e) {
             vyhubBans = null;
-            getPlatform().log(SEVERE, "Failed to fetch Bans from VyHub API: " + e.getMessage());
+            platform.log(SEVERE, "Failed to fetch Bans from VyHub API: " + e.getMessage());
         }
 
         if (response == null || response.code() != 200) {
             vyhubBans = null;
-            getPlatform().log(WARNING, "Bans could not be fetched from VyHub API.");
+            platform.log(WARNING, "Bans could not be fetched from VyHub API.");
             return;
         }
 
@@ -87,7 +87,7 @@ public abstract class ABans extends SuperClass{
         processedPlayers = banCache.load();
 
         if (processedPlayers == null) {
-            getPlatform().log(WARNING, "Missing VyHub banned_players.json, defaulting to empty list.");
+            platform.log(WARNING, "Missing VyHub banned_players.json, defaulting to empty list.");
             processedPlayers = new HashSet<>();
         }
     }
@@ -130,14 +130,14 @@ public abstract class ABans extends SuperClass{
         for (String playerID : bannedMinecraftPlayersDiff) {
             if (processedPlayers.contains(playerID)) {
                 // Unbanned on VyHub
-                getPlatform().log(INFO, String.format("Unbanning minecraft ban for player %s. (Unbanned on VyHub)", playerID));
+                platform.log(INFO, String.format("Unbanning minecraft ban for player %s. (Unbanned on VyHub)", playerID));
 
                 if (unbanMinecraftBan(playerID)) {
                     processedPlayers.remove(playerID);
                 }
             } else {
                 // Missing on VyHub
-                getPlatform().log(INFO, String.format("Adding VyHub ban for player %s from minecraft. (Banned on minecraft server)", playerID));
+                platform.log(INFO, String.format("Adding VyHub ban for player %s from minecraft. (Banned on minecraft server)", playerID));
 
                 if (addVyHubBan(playerID, minecraftBans.get(playerID))) {
                     processedPlayers.add(playerID);
@@ -149,14 +149,14 @@ public abstract class ABans extends SuperClass{
         for (String playerID : bannedVyHubPlayersDiff) {
             if (processedPlayers.contains(playerID)) {
                 // Unbanned on Minecraft Server
-                getPlatform().log(INFO, String.format("Unbanning VyHub ban for player %s. (Unbanned on minecraft server)", playerID));
+                platform.log(INFO, String.format("Unbanning VyHub ban for player %s. (Unbanned on minecraft server)", playerID));
 
                 if (unbanVyHubBan(playerID)) {
                     processedPlayers.remove(playerID);
                 }
             } else {
                 // Missing on Minecraft Server
-                getPlatform().log(INFO, String.format("Adding minecraft ban for player %s from VyHub. (Banned on VyHub)", playerID));
+                platform.log(INFO, String.format("Adding minecraft ban for player %s from VyHub. (Banned on VyHub)", playerID));
                 if (addMinecraftBan(playerID, vyhubBans.get(playerID).get(0))) {
                     processedPlayers.add(playerID);
                 }
@@ -217,15 +217,15 @@ public abstract class ABans extends SuperClass{
 
         if (vyHubAdminUserID != null) {
             try {
-                response = getPlatform().getApiClient().createBan(vyHubAdminUserID, Utility.createRequestBody(values)).execute();
+                response = platform.getApiClient().createBan(vyHubAdminUserID, Utility.createRequestBody(values)).execute();
             } catch (IOException e) {
-                getPlatform().log(SEVERE, "Failed to create ban" + e.getMessage());
+                platform.log(SEVERE, "Failed to create ban" + e.getMessage());
             }
         } else {
             try {
-                response = getPlatform().getApiClient().createBanWithoutCreator(Utility.createRequestBody(values)).execute();
+                response = platform.getApiClient().createBanWithoutCreator(Utility.createRequestBody(values)).execute();
             } catch (IOException e) {
-                getPlatform().log(SEVERE, "Failed to create ban" + e.getMessage());
+                platform.log(SEVERE, "Failed to create ban" + e.getMessage());
             }
         }
 
@@ -240,9 +240,9 @@ public abstract class ABans extends SuperClass{
 
         Response<Ban> response;
         try {
-           response = getPlatform().getApiClient().unbanUser(user.getId(), AServer.serverbundleID).execute();
+           response = platform.getApiClient().unbanUser(user.getId(), AServer.serverbundleID).execute();
         } catch (IOException e) {
-            getPlatform().log(SEVERE, "Failed to unban user" + e.getMessage());
+            platform.log(SEVERE, "Failed to unban user" + e.getMessage());
             return false;
         }
 
