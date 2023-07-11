@@ -7,8 +7,6 @@ import net.vyhub.entity.MinecraftBan;
 import net.vyhub.entity.VyHubUser;
 import net.vyhub.lib.Cache;
 import net.vyhub.lib.Utility;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import retrofit2.Response;
 
 import java.io.IOException;
@@ -172,6 +170,8 @@ public abstract class ABans extends VyHubAbstractBase{
 
     public abstract boolean unbanMinecraftBan(String playerID);
 
+    public abstract String getPlayerIdentifier(String playerName);
+
     public boolean addVyHubBan(String playerID, MinecraftBan minecraftBan) {
         VyHubUser user = aUser.getUser(playerID);
         if (user == null) {
@@ -188,12 +188,11 @@ public abstract class ABans extends VyHubAbstractBase{
 
         String vyHubAdminUserID = null;
         if (!minecraftBan.getSource().equals("CONSOLE") && !minecraftBan.getSource().equals("Server")) {
-            // TODO is the source a potential player?
             try {
-                Player sourcePlayer = Bukkit.getPlayer(minecraftBan.getSource());
+                String sourcePlayerId = getPlayerIdentifier(minecraftBan.getSource());
 
-                if (sourcePlayer != null) {
-                    VyHubUser admin = aUser.getUser(sourcePlayer.getUniqueId().toString());
+                if (sourcePlayerId != null) {
+                    VyHubUser admin = aUser.getUser(sourcePlayerId);
 
                     if (admin != null) {
                         vyHubAdminUserID = admin.getId();

@@ -43,4 +43,14 @@ public class TBans extends ABans {
         Bukkit.getBanList(BanList.Type.NAME).pardon(playerID);
         return true;
     }
+
+    @Override
+    public String getPlayerIdentifier(String playerName) {
+        Player sourcePlayer = Bukkit.getPlayer(playerName);
+        if (sourcePlayer != null) {
+            return sourcePlayer.getUniqueId().toString();
+        } else {
+            return null;
+        }
+    }
 }
