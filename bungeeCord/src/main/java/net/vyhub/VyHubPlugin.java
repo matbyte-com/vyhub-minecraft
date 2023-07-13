@@ -1,11 +1,5 @@
 package net.vyhub;
 
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.event.EventBus;
-import net.luckperms.api.event.node.NodeAddEvent;
-import net.luckperms.api.event.node.NodeClearEvent;
-import net.luckperms.api.event.node.NodeRemoveEvent;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -37,7 +31,6 @@ public class VyHubPlugin extends Plugin {
     private VyHubAPI apiClient;
     private OkHttpClient httpClient;
     private I18n i18n;
-    public Config config;
     public TUser tUser;
     public TServer tServer;
 
@@ -58,7 +51,6 @@ public class VyHubPlugin extends Plugin {
         platform = new BungeeVyHubPlatform(this);
         scheduler = getProxy().getScheduler();
 
-        config = new Config(this);
         tUser = new TUser(this.platform);
         tServer = new TServer(this.platform, this.tUser);
 
@@ -72,8 +64,6 @@ public class VyHubPlugin extends Plugin {
 
         getProxy().getPluginManager().registerCommand(this, new Config(this));
         getProxy().getPluginManager().registerCommand(this, new Setup(this));
-        // TODO ADD other Config Command
-        //plugin.getCommand("vh_setup").setExecutor(config);
 
         readyCheckTaskID = scheduler.schedule(plugin, this::checkReady, 0, 1, TimeUnit.MINUTES).getId();
     }

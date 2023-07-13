@@ -1,4 +1,4 @@
-package net.vyhub;
+package net.vyhub.tasks;
 
 import net.vyhub.VyHubPlatform;
 import net.vyhub.abstractClasses.AUser;

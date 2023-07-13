@@ -1,7 +1,7 @@
-package net.vyhub;
+package net.vyhub.tasks;
 
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ProxyServer;
 import net.vyhub.VyHubPlatform;
 import net.vyhub.abstractClasses.AServer;
 import net.vyhub.abstractClasses.AUser;
@@ -13,13 +13,15 @@ import java.util.List;
 import java.util.Map;
 
 public class TServer extends AServer {
-    public TServer(VyHubPlatform platform, AUser aUser) {
+    ProxyServer server;
+    public TServer(VyHubPlatform platform, AUser aUser, ProxyServer server) {
         super(platform, aUser);
+        this.server = server;
     }
     public HashMap<String, Object> collectServerStatistics() {
         List<Map<String, Object>> user_activities = new LinkedList<>();
 
-        for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
+        for (Player player : server.getAllPlayers()) {
             VyHubUser user = getAUser().getUser(player.getUniqueId().toString());
 
             if (user != null) {
@@ -37,17 +39,16 @@ public class TServer extends AServer {
         }
 
         HashMap<String, Object> values = new HashMap<String, Object>() {{
-            put("users_current", String.valueOf(ProxyServer.getInstance().getOnlineCount()));
+            put("users_current", String.valueOf(server.getPlayerCount()));
             put("user_activities", user_activities);
             put("is_alive", "true");
         }};
 
-        Integer playerLimit = ProxyServer.getInstance().getConfig().getPlayerLimit();
+        Integer playerLimit = server.getConfiguration().getShowMaxPlayers();;
         if (playerLimit >= 1) {
             values.put("users_max", String.valueOf(playerLimit));
         } else {
             values.put("users_max", null);
-
         }
 
         return values;
