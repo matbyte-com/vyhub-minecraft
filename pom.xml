@@ -12,6 +12,7 @@
         <module>bukkit</module>
         <module>common</module>
         <module>bungeeCord</module>
+        <module>Velocity</module>
     </modules>
 
     <properties>
