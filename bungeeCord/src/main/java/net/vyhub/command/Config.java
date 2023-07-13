@@ -3,6 +3,7 @@ package net.vyhub.command;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.vyhub.VyHubPlugin;
 import net.vyhub.config.VyHubConfiguration;
@@ -17,6 +18,10 @@ public class Config extends Command {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+        // Config /vh_config <key> <value>
+        if (sender instanceof ProxiedPlayer && !sender.hasPermission("vyhub.config")) {
+            return;
+        }
         if (args.length != 2) {
             return;
         }

@@ -124,7 +124,7 @@ public class VyHubPlugin extends JavaPlugin {
             scheduler.runTaskTimerAsynchronously(plugin, tGroups::syncGroupsForAll, 20L * 60L * 10L, 20L * 60L * 8L);
         }
 
-        if (!VyHubConfiguration.getIsProxyServer()) {
+        if (!VyHubConfiguration.getIsBackendServer()) {
             scheduler.runTaskTimerAsynchronously(plugin, tServer::patchServer, 20L * 1L, 20L * 60L);
         }
     }
@@ -207,9 +207,9 @@ public class VyHubPlugin extends JavaPlugin {
     }
 
     public void checkOfflineMode() {
-        if (!plugin.getServer().getOnlineMode() && !VyHubConfiguration.getIsProxyServer()) {
+        if (!plugin.getServer().getOnlineMode() && !VyHubConfiguration.getIsBackendServer()) {
             this.platform.log(WARNING, "You are running in offline mode. Unless you are using a proxy (such as BungeeCord/Velocity) that corrects UUIDs, then you may experience issues with packages not applying");
-            this.platform.log(WARNING, "You can suppress this warning by setting is_proxy_server to true in your VyHub config.json");
+            this.platform.log(WARNING, "You can suppress this warning by setting is_backend_server to true in your VyHub config.json");
         }
     }
 }

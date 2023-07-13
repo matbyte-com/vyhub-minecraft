@@ -41,7 +41,7 @@ public class SetupCommand implements SimpleCommand {
 
     @Override
     public boolean hasPermission(final SimpleCommand.Invocation invocation) {
-        return invocation.source().hasPermission("vyhub.admin");
+        return invocation.source().hasPermission("vyhub.config");
     }
 
 }

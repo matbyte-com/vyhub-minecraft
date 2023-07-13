@@ -37,7 +37,7 @@ public class ConfigCommand implements SimpleCommand {
 
     @Override
     public boolean hasPermission(final Invocation invocation) {
-        return invocation.source().hasPermission("vyhub.admin");
+        return invocation.source().hasPermission("vyhub.config");
     }
 
 }

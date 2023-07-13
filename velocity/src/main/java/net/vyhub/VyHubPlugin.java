@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 
-@Plugin(id = "vyhub", name = "VyHub", version = "1.5.1",
+@Plugin(id = "vyhub", name = "vyhub", version = "1.5.1",
         url = "https://vyhub.net", description = "VyHub plugin to manage and monetize your Minecraft server. You can create your webstore for free with VyHub!", authors = {"VyHub, Matbyte"})
 public class VyHubPlugin {
     public static VyHubPlugin plugin;
@@ -82,7 +82,7 @@ public class VyHubPlugin {
         VyHubConfiguration.setPlatform(platform);
         VyHubConfiguration.loadConfig();
         i18n = new I18n(VyHubConfiguration.getLocale());
-        httpClient = Utility.okhttp(new File(dataDirectory.toFile(), "cache"));
+        httpClient = Utility.okhttp(new File("plugins/VyHub/", "cache"));
 
         sendStartupMessage();
 

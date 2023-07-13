@@ -3,6 +3,7 @@ package net.vyhub.command;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.vyhub.VyHubPlugin;
 import net.vyhub.config.VyHubConfiguration;
@@ -16,8 +17,12 @@ public class Setup extends Command {
     }
 
     @Override
-    public void execute(CommandSender commandSender, String[] args) {
+    public void execute(CommandSender sender, String[] args) {
         // Fast setup /vh_setup <api_key> <api_url> <server_id>
+        if (sender instanceof ProxiedPlayer && !sender.hasPermission("vyhub.config")) {
+            return;
+        }
+
         if (args.length != 3) {
             return;
         }
@@ -34,6 +39,6 @@ public class Setup extends Command {
         VyHubConfiguration.setConfigValue("api_url", api_url);
         VyHubConfiguration.setConfigValue("server_id", server_id);
 
-        commandSender.sendMessage(new TextComponent(ChatColor.GREEN + plugin.getI18n().get("Config Saved")));
+        sender.sendMessage(new TextComponent(ChatColor.GREEN + plugin.getI18n().get("Config Saved")));
     }
 }

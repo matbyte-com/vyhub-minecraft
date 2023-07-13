@@ -32,7 +32,7 @@ public class VyHubConfiguration {
             config.put("api_url", "");
             config.put("api_key", "");
             config.put("server_id", "");
-            config.put("is_proxy_server", "false");
+            config.put("is_backend_server", "false");
             config.put("advert_prefix", "[★] ");
             config.put("advert_interval", "180");
             config.put("locale", "en");
@@ -75,7 +75,7 @@ public class VyHubConfiguration {
         return config.get("advert_prefix");
     }
 
-    public static Boolean getIsProxyServer() { return Boolean.valueOf(config.get("is_proxy_server")); }
+    public static Boolean getIsBackendServer() { return Boolean.valueOf(config.get("is_backend_server")); }
 
     public static void updateCache() {
         configCache.save(config);
