@@ -1,0 +1,5 @@
+name: VyHub
+version: '${project.version}'
+description: 'VyHub plugin to manage and monetize your Minecraft server. You can create your webstore for free with VyHub!'
+main: net.vyhub.VyHubPlugin
+api-version: 1.13

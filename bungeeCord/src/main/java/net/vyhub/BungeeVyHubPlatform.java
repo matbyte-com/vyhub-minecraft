@@ -1,18 +1,18 @@
 package net.vyhub;
 
+import net.md_5.bungee.api.plugin.Event;
 import net.vyhub.config.I18n;
 import net.vyhub.config.VyHubConfiguration;
-import org.bukkit.Bukkit;
-import org.bukkit.event.Event;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-public class BukkitVyHubPlatform implements VyHubPlatform {
+public class BungeeVyHubPlatform implements VyHubPlatform {
     private final VyHubPlugin plugin;
-    protected BukkitVyHubPlatform(final VyHubPlugin plugin) {
+    protected BungeeVyHubPlatform(final VyHubPlugin plugin) {
         this.plugin = plugin;
     }
+
     @Override
     public VyHubAPI getApiClient() {
         return this.plugin.getApiClient();
@@ -25,22 +25,24 @@ public class BukkitVyHubPlatform implements VyHubPlatform {
 
     @Override
     public void executeAsync(Runnable runnable) {
-        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, runnable);
+        plugin.getProxy().getScheduler().runAsync(plugin, runnable);
     }
 
     @Override
     public void executeAsyncLater(Runnable runnable, long time, TimeUnit unit) {
-        plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, runnable, unit.toMillis(time) / 50);
+        plugin.getProxy().getScheduler().schedule(plugin, runnable, time, unit);
     }
 
     @Override
     public void executeBlocking(Runnable runnable) {
-        plugin.getServer().getScheduler().runTask(plugin, runnable);
+        // BungeeCord has no concept of blocking tasks
+        executeAsync(runnable);
     }
 
     @Override
     public void executeBlockingLater(Runnable runnable, long time, TimeUnit unit) {
-        Bukkit.getScheduler().runTaskLater(plugin, runnable, unit.toMillis(time) / 50);
+        // BungeeCord has no concept of blocking tasks
+        executeAsyncLater(runnable, time, unit);
     }
 
     @Override
@@ -50,7 +52,7 @@ public class BukkitVyHubPlatform implements VyHubPlatform {
 
     @Override
     public void callEvent(Object event) {
-        Event bukkitEvent = (Event) event;
-        executeBlocking(() -> plugin.getServer().getPluginManager().callEvent(bukkitEvent));
+        Event bungeeEvent = (Event) event;
+        plugin.getProxy().getPluginManager().callEvent(bungeeEvent);
     }
 }

@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 public class VyHubConfiguration {
-    private static Map<String, String> config;
+    private static Map<String, String> config = new HashMap<>();
     private static VyHubPlatform platform;
 
     public static Cache<Map<String, String>> configCache = new Cache<>(

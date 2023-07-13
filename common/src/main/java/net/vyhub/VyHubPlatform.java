@@ -9,7 +9,6 @@ import java.util.logging.Level;
 public interface VyHubPlatform {
     VyHubAPI getApiClient();
     I18n getI18n();
-    VyHubConfiguration getConfiguration();
     void executeAsync(Runnable runnable);
     void executeAsyncLater(Runnable runnable, long time, TimeUnit unit);
     void executeBlocking(Runnable runnable);
