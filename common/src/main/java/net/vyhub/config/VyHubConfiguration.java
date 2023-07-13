@@ -75,7 +75,7 @@ public class VyHubConfiguration {
         return config.get("advert_prefix");
     }
 
-    public static Boolean getIsBungeeCord() { return Boolean.valueOf(config.get("is_proxy_server")); }
+    public static Boolean getIsProxyServer() { return Boolean.valueOf(config.get("is_proxy_server")); }
 
     public static void updateCache() {
         configCache.save(config);
