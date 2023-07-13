@@ -88,6 +88,8 @@ public class VyHubPlugin extends JavaPlugin {
 
         sendStartupMessage();
 
+        checkOfflineMode();
+
         plugin.getCommand("vh_config").setExecutor(config);
         plugin.getCommand("vh_setup").setExecutor(config);
 
@@ -199,5 +201,12 @@ public class VyHubPlugin extends JavaPlugin {
         Bukkit.getConsoleSender().sendMessage("  \\  / |__|   " + ChatColor.DARK_RED + "VyHub" + ChatColor.AQUA + " v" + plugin.getDescription().getVersion());
         Bukkit.getConsoleSender().sendMessage("   \\/  |  |   " + ChatColor.DARK_GRAY + "Running on Bukkit");
         Bukkit.getConsoleSender().sendMessage("");
+    }
+
+    public void checkOfflineMode() {
+        if (!plugin.getServer().getOnlineMode() && !VyHubConfiguration.getIsBungeeCord()) {
+            this.platform.log(WARNING, "You are running in offline mode. Unless you are using a proxy (such as BungeeCord/Velocity) that corrects UUIDs, then you may experience issues with packages not applying");
+            this.platform.log(WARNING, "You can suppress this warning by setting is_proxy_server to true in your VyHub config.json");
+        }
     }
 }

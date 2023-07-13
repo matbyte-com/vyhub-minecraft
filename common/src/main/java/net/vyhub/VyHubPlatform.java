@@ -1,7 +1,6 @@
 package net.vyhub;
 
 import net.vyhub.config.I18n;
-import net.vyhub.config.VyHubConfiguration;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;

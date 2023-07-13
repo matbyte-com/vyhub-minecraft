@@ -3,20 +3,14 @@ package net.vyhub.tasks;
 import net.vyhub.VyHubPlatform;
 import net.vyhub.abstractClasses.AServer;
 import net.vyhub.abstractClasses.AUser;
-import net.vyhub.config.VyHubConfiguration;
 import net.vyhub.entity.VyHubUser;
-import net.vyhub.lib.Utility;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import retrofit2.Response;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import static net.vyhub.lib.Utility.checkResponse;
 
 public class TServer extends AServer {
     public TServer(VyHubPlatform platform, AUser aUser) {

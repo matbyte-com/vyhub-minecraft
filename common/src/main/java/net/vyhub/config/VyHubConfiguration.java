@@ -32,6 +32,7 @@ public class VyHubConfiguration {
             config.put("api_url", "");
             config.put("api_key", "");
             config.put("server_id", "");
+            config.put("is_proxy_server", "false");
             config.put("advert_prefix", "[★] ");
             config.put("advert_interval", "180");
             config.put("locale", "en");
@@ -73,6 +74,8 @@ public class VyHubConfiguration {
     public static String getAdvertPrefix() {
         return config.get("advert_prefix");
     }
+
+    public static Boolean getIsBungeeCord() { return Boolean.valueOf(config.get("is_proxy_server")); }
 
     public static void updateCache() {
         configCache.save(config);
