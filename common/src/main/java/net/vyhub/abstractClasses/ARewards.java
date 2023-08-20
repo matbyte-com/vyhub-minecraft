@@ -74,6 +74,7 @@ public abstract class ARewards extends VyHubAbstractBase {
 
         if (response != null && response.isSuccessful()) {
             rewards = response.body();
+            executedRewards = new ArrayList<>();
         }
     }
 
@@ -179,9 +180,8 @@ public abstract class ARewards extends VyHubAbstractBase {
                 continue;
             }
 
-            if (response != null && response.isSuccessful()) {
+            if (response.isSuccessful()) {
                 newExecutedAndSentRewards.add(rewardID);
-                it.remove();
                 saveExecuted();
             }
         }
