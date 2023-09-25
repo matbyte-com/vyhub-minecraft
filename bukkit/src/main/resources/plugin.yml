@@ -7,10 +7,9 @@ api-version: 1.13
 softdepend:
   - LuckPerms
 commands:
-  login:
-    description: 'Login user for VyHub'
-    usage: '/login <uuid>'
-    aliases: ['l']
+  vylogin:
+    description: 'Login user to VyHub'
+    usage: '/vylogin <uuid>'
 
   timeban:
     description: 'Ban user for a certain time'

@@ -151,7 +151,7 @@ public class VyHubPlugin extends JavaPlugin {
     }
 
     private void commandRegistration() {
-        plugin.getCommand("login").setExecutor(login);
+        plugin.getCommand("vylogin").setExecutor(login);
         plugin.getCommand("timeban").setExecutor(ban);
         plugin.getCommand("warn").setExecutor(warn);
     }
