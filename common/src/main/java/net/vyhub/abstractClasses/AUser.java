@@ -23,7 +23,7 @@ public abstract class AUser extends VyHubAbstractBase {
     }
 
     public void checkPlayerExists(String playerId, String playerName) {
-        VyHubUser user = getUser(playerId);
+        VyHubUser user = getUser(playerId, playerName);
 
         if (user == null) {
             platform.log(Level.WARNING, String.format("Could not register player %s, trying again in a minute..", playerName));
@@ -38,10 +38,11 @@ public abstract class AUser extends VyHubAbstractBase {
 
     public abstract void sendMessage(String playerName, String message);
 
-    public VyHubUser createUser(String UUID) {
+    public VyHubUser createUser(String UUID, String username) {
         HashMap<String, Object> values = new HashMap<String, Object>() {{
             put("type", "MINECRAFT");
             put("identifier", UUID);
+            put("username", username);
         }};
 
         Response<VyHubUser> response;
@@ -60,10 +61,14 @@ public abstract class AUser extends VyHubAbstractBase {
     }
 
     public VyHubUser getUser(String UUID) {
-        return getUser(UUID, true);
+        return getUser(UUID, true, null);
     }
 
-    public VyHubUser getUser(String UUID, Boolean create) {
+    public VyHubUser getUser(String UUID, String username) {
+        return getUser(UUID, true, username);
+    }
+
+    public VyHubUser getUser(String UUID, Boolean create, String username) {
         if (UUID == null || UUID.isEmpty()) {
             throw new IllegalArgumentException("UUID may not be empty or null.");
         }
@@ -99,7 +104,7 @@ public abstract class AUser extends VyHubAbstractBase {
                 return null;
             }
 
-            VyHubUser vyHubUser = getUser(UUID, false);
+            VyHubUser vyHubUser = getUser(UUID, false, null);
 
             if (vyHubUser != null) {
                 return vyHubUser;
@@ -108,7 +113,7 @@ public abstract class AUser extends VyHubAbstractBase {
             platform.log(INFO, String.format("Could not find VyHub user for player %s, creating..", UUID));
 
             if (response.code() == 404) {
-                vyHubUser = createUser(UUID);
+                vyHubUser = createUser(UUID, username);
 
                 if (vyHubUser == null) {
                     return null;
