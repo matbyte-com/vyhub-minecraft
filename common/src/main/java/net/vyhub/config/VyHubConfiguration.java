@@ -36,6 +36,7 @@ public class VyHubConfiguration {
             config.put("advert_prefix", "[★] ");
             config.put("advert_interval", "180");
             config.put("locale", "en");
+            config.put("send_succes_annoucments", "true");
 
             configCache.save(config);
         } else {
@@ -76,6 +77,8 @@ public class VyHubConfiguration {
     }
 
     public static Boolean getIsBackendServer() { return Boolean.valueOf(config.get("is_backend_server")); }
+
+    public static Boolean getSuccesMessage() { return Boolean.valueOf(config.get("send_succes_annoucments")); }
 
     public static void updateCache() {
         configCache.save(config);
