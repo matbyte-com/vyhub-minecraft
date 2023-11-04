@@ -121,8 +121,8 @@ public class TGroups extends AGroups implements Listener {
                     if (!currentNodes.contains(node)) {
                         groupChangeBacklog.add(getBacklogKey(playerID, groupName, "add"));
                         user.data().add(node);
-                        if (VyHubConfiguration.getSuccesMessage()) {
-                        player.sendMessage(ChatColor.YELLOW + String.format(getPlatform().getI18n().get("groupAdded"), groupName));
+                        if (VyHubConfiguration.getGroupChangedNotifications()) {
+                            player.sendMessage(ChatColor.YELLOW + String.format(getPlatform().getI18n().get("groupAdded"), groupName));
                         } else {
                             return;
                         }
@@ -136,7 +136,7 @@ public class TGroups extends AGroups implements Listener {
                     String groupName = n.getGroupName();
                     groupChangeBacklog.add(getBacklogKey(playerID, groupName, "remove"));
                     user.data().remove(n);
-                    if (VyHubConfiguration.getSuccesMessage()) {
+                    if (VyHubConfiguration.getGroupChangedNotifications()) {
                         player.sendMessage(ChatColor.YELLOW + String.format(getPlatform().getI18n().get("groupRemoved"), groupName));
                     } else {
                         return;
