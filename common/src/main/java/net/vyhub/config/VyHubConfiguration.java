@@ -36,6 +36,7 @@ public class VyHubConfiguration {
             config.put("advert_prefix", "[★] ");
             config.put("advert_interval", "180");
             config.put("locale", "en");
+            config.put("group_changed_notifications", "true");
 
             configCache.save(config);
         } else {
@@ -76,6 +77,14 @@ public class VyHubConfiguration {
     }
 
     public static Boolean getIsBackendServer() { return Boolean.valueOf(config.get("is_backend_server")); }
+
+    public static Boolean enableGroupChangedNotifications() {
+        if (config.containsKey("group_changed_notifications")) {
+            return Boolean.valueOf(config.get("group_changed_notifications"));
+        } else {
+            return true;
+        }
+    }
 
     public static void updateCache() {
         configCache.save(config);

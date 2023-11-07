@@ -12,6 +12,7 @@ import net.luckperms.api.node.types.InheritanceNode;
 import net.vyhub.VyHubPlatform;
 import net.vyhub.abstractClasses.AGroups;
 import net.vyhub.abstractClasses.AUser;
+import net.vyhub.config.VyHubConfiguration;
 import net.vyhub.entity.VyHubUser;
 import net.vyhub.event.VyHubPlayerInitializedEvent;
 import org.bukkit.Bukkit;
@@ -120,7 +121,9 @@ public class TGroups extends AGroups implements Listener {
                     if (!currentNodes.contains(node)) {
                         groupChangeBacklog.add(getBacklogKey(playerID, groupName, "add"));
                         user.data().add(node);
-                        player.sendMessage(ChatColor.YELLOW + String.format(getPlatform().getI18n().get("groupAdded"), groupName));
+                        if (VyHubConfiguration.enableGroupChangedNotifications()) {
+                            player.sendMessage(ChatColor.YELLOW + String.format(getPlatform().getI18n().get("groupAdded"), groupName));
+                        }
                     }
                 }
             }
@@ -131,7 +134,9 @@ public class TGroups extends AGroups implements Listener {
                     String groupName = n.getGroupName();
                     groupChangeBacklog.add(getBacklogKey(playerID, groupName, "remove"));
                     user.data().remove(n);
-                    player.sendMessage(ChatColor.YELLOW + String.format(getPlatform().getI18n().get("groupRemoved"), groupName));
+                    if (VyHubConfiguration.enableGroupChangedNotifications()) {
+                        player.sendMessage(ChatColor.YELLOW + String.format(getPlatform().getI18n().get("groupRemoved"), groupName));
+                    }
                 }
             }
             api.getUserManager().saveUser(user);
