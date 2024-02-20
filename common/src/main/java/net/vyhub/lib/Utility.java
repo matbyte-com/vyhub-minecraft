@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import retrofit2.Response;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.ProxySelector;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +36,13 @@ public class Utility {
 
     public static Boolean checkResponse(VyHubPlatform platform, Response response, String action) {
         if (!response.isSuccessful()) {
-            platform.log(SEVERE, String.format("[API Error] Failed to %s: %s", action, response.message()));
+            try {
+                assert response.errorBody() != null;
+                platform.log(SEVERE, String.format("[API Error] Failed to %s: %d, %s", action, response.code(), response.errorBody().string()));
+                platform.log(SEVERE, String.format("[API Error] Request: %s", response.raw().request().url(), response.raw().request().body()));
+            } catch (IOException | NullPointerException | AssertionError e) {
+                platform.log(SEVERE, String.format("[API Error] Failed to %s - Response body contains exception: %s", action, e.getMessage()));
+            }
             return false;
         }
         return true;
