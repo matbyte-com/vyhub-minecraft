@@ -127,7 +127,7 @@ public class TGroups extends AGroups implements Listener {
 
             for (InheritanceNode n : currentNodes) {
                 // Only remove group if there is a mapping for it. Otherwise, let it there
-                if (!nodes.contains(n) && getMappedGroups().containsKey(n.getGroupName())) {
+                if (!nodes.contains(n) && getMappedGroups() != null && getMappedGroups().containsKey(n.getGroupName())) {
                     String groupName = n.getGroupName();
                     groupChangeBacklog.add(getBacklogKey(playerID, groupName, "remove"));
                     user.data().remove(n);
