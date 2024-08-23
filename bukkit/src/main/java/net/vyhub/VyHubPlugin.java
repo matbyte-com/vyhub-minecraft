@@ -23,8 +23,7 @@ import retrofit2.Response;
 import java.io.File;
 import java.util.Objects;
 
-import static java.util.logging.Level.INFO;
-import static java.util.logging.Level.WARNING;
+import static java.util.logging.Level.*;
 
 public class VyHubPlugin extends JavaPlugin {
     public static JavaPlugin plugin;
@@ -61,6 +60,7 @@ public class VyHubPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         plugin = this;
+
         platform = new BukkitVyHubPlatform(this);
 
         // Load Command and Task classes

@@ -13,8 +13,14 @@ import org.bukkit.entity.Player;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Ban implements CommandExecutor {
+    private final Pattern verPattern = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)");
+    private final Matcher verMatcher = verPattern.matcher(Bukkit.getBukkitVersion());
+    private final boolean pre120 = !verMatcher.find() || !(Integer.parseInt(verMatcher.group(1)) >= 2 || Integer.parseInt(verMatcher.group(2)) >= 20);
+
     private final VyHubPlatform platform;
     private final AGroups aGroups;
 
@@ -57,8 +63,13 @@ public class Ban implements CommandExecutor {
                 }
 
                 String reason = args.length == 3 ? args[2] : null;
+
+                if (pre120) {
+                    Bukkit.getBanList(BanList.Type.NAME).addBan(p.getUniqueId().toString(), reason, new Date(Calendar.getInstance().getTimeInMillis() + (minutes * 60 * 1000)), sender.getName());
+                } else {
+                    p.ban(reason, new Date(Calendar.getInstance().getTimeInMillis() + (minutes * 60 * 1000)), sender.getName(), false);
+                }
                 p.kickPlayer(String.format(platform.getI18n().get("youGotTimeBanned"), minutes, reason));
-                Bukkit.getBanList(BanList.Type.NAME).addBan(p.getUniqueId().toString(), reason, new Date(Calendar.getInstance().getTimeInMillis() + (minutes * 60 * 1000)), sender.getName());
             } else {
                 sender.sendMessage(platform.getI18n().get("playerMustBeOnline"));
             }

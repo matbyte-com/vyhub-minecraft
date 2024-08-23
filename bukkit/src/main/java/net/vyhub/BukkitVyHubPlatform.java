@@ -1,7 +1,6 @@
 package net.vyhub;
 
 import net.vyhub.config.I18n;
-import net.vyhub.config.VyHubConfiguration;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 
