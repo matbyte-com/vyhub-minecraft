@@ -6,7 +6,10 @@ import net.vyhub.abstractClasses.AGroups;
 import net.vyhub.abstractClasses.AUser;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.ban.ProfileBanList;
 import org.bukkit.entity.Player;
+import org.bukkit.profile.PlayerProfile;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -25,7 +28,19 @@ public class TBans extends ABans {
             endDate = Date.from(expiresDate.toInstant());
         }
 
-        Bukkit.getBanList(BanList.Type.NAME).addBan(playerID, vyhubBan.getReason(), endDate, "VyHub");
+        String creator = "VyHub";
+        if (vyhubBan.getCreator() != null) {
+            creator = vyhubBan.getCreator().getUsername();
+        }
+
+        try {
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(playerID));
+            PlayerProfile playerProfile = Bukkit.createPlayerProfile(UUID.fromString(playerID), offlinePlayer.getName());
+
+            ((ProfileBanList) Bukkit.getBanList(BanList.Type.PROFILE)).addBan(playerProfile, vyhubBan.getReason(), endDate, creator);
+        } catch (NoSuchMethodError e) {
+            Bukkit.getBanList(BanList.Type.NAME).addBan(playerID, vyhubBan.getReason(), endDate, creator);
+        }
 
         Player bannnedPlayer = Bukkit.getPlayer(UUID.fromString(playerID));
         if (bannnedPlayer != null) {
@@ -40,7 +55,14 @@ public class TBans extends ABans {
 
     @Override
     public boolean unbanMinecraftBan(String playerID) {
-        Bukkit.getBanList(BanList.Type.NAME).pardon(playerID);
+        try {
+            PlayerProfile playerProfile = Bukkit.createPlayerProfile(UUID.fromString(playerID), "");
+
+            ((ProfileBanList) Bukkit.getBanList(BanList.Type.PROFILE)).pardon(playerProfile);
+        } catch (NoSuchMethodError e) {
+            Bukkit.getBanList(BanList.Type.NAME).pardon(playerID);
+        }
+
         return true;
     }
 

@@ -5,6 +5,7 @@ import net.vyhub.abstractClasses.AGroups;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.ban.ProfileBanList;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -57,8 +58,25 @@ public class Ban implements CommandExecutor {
                 }
 
                 String reason = args.length == 3 ? args[2] : null;
+                Date expireDate = new Date(Calendar.getInstance().getTimeInMillis() + (minutes * 60 * 1000));
+
+                try {
+                    ((ProfileBanList) Bukkit.getBanList(BanList.Type.PROFILE)).addBan(
+                            p.getPlayerProfile(),
+                            reason,
+                            expireDate,
+                            sender.getName()
+                    );
+                } catch (NoSuchMethodError | NoSuchFieldError e) {
+                    Bukkit.getBanList(BanList.Type.NAME).addBan(
+                            p.getName(),
+                            reason,
+                            expireDate,
+                            sender.getName()
+                    );
+                }
+
                 p.kickPlayer(String.format(platform.getI18n().get("youGotTimeBanned"), minutes, reason));
-                Bukkit.getBanList(BanList.Type.NAME).addBan(p.getUniqueId().toString(), reason, new Date(Calendar.getInstance().getTimeInMillis() + (minutes * 60 * 1000)), sender.getName());
             } else {
                 sender.sendMessage(platform.getI18n().get("playerMustBeOnline"));
             }

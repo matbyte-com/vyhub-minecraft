@@ -27,7 +27,7 @@ public abstract class ABans extends VyHubAbstractBase{
     private static Set<String> processedPlayers = new HashSet<>();
     private static Map<String, MinecraftBan> minecraftBans = null;
     private static Map<String, List<Ban>> vyhubBans = null;
-    private final AUser aUser;
+    protected final AUser aUser;
     private final AGroups aGroups;
 
     public ABans(VyHubPlatform platform, AUser aUser, AGroups aGroups) {

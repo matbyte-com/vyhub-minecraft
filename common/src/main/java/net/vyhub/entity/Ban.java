@@ -7,14 +7,16 @@ public class Ban {
     private String ends_on;
     private String status;
     private Boolean active;
+    private VyHubUser creator;
 
-    public Ban(String id, String reason, Integer length, String ends_on, String status, Boolean active) {
+    public Ban(String id, String reason, Integer length, String ends_on, String status, Boolean active, VyHubUser creator) {
         this.id = id;
         this.reason = reason;
         this.length = length;
         this.ends_on = ends_on;
         this.status = status;
         this.active = active;
+        this.creator = creator;
     }
 
     public String getId() {
@@ -39,5 +41,13 @@ public class Ban {
 
     public Boolean getActive() {
         return active;
+    }
+
+    public VyHubUser getCreator() {
+        return creator;
+    }
+
+    public void setCreator(VyHubUser creator) {
+        this.creator = creator;
     }
 }
